@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.renyu.blelibrary.bean.BLEDevice;
@@ -14,21 +15,32 @@ import com.renyu.blelibrary.impl.BLEConnectListener;
 import com.renyu.blelibrary.impl.BLEStateChangeListener;
 import com.renyu.blelibrary.params.CommonParams;
 import com.renyu.blelibrary.utils.BLEUtils;
+import com.renyu.iitebletest.jniLibs.JNIUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
 
     ProgressDialog progressDialog;
     BLEFramework bleFramework;
 
+    JNIUtils jniUtils;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ButterKnife.bind(this);
+
+        jniUtils=new JNIUtils();
+
         bleFramework=BLEFramework.getBleFrameworkInstance(this);
-        bleFramework.setTimeSeconds(20000);
+        bleFramework.setTimeSeconds(30000);
         bleFramework.setBleConnectListener(new BLEConnectListener() {
             @Override
             public void getAllScanDevice(ArrayList<BLEDevice> devices) {
@@ -40,8 +52,27 @@ public class MainActivity extends AppCompatActivity {
                     int b=(int) scanRecord[6]&0xff;
                     if (a==0xaa && b==0xfe) {
                         bleFramework.startConn(device.getDevice());
+                        byte[] password={scanRecord[11], scanRecord[12], scanRecord[13],
+                                scanRecord[14], scanRecord[15], scanRecord[16], scanRecord[17],
+                                scanRecord[18], scanRecord[19], scanRecord[20], scanRecord[21],
+                                scanRecord[22], scanRecord[23], scanRecord[24], scanRecord[25],
+                                scanRecord[26]};
+                        byte[] mic={scanRecord[27], scanRecord[28], scanRecord[29],
+                                scanRecord[30]};
+                        byte[] b3=jniUtils.senddecode(password, mic, 16);
+                        byte[] b4=new byte[6];
+                        b4[0]=b3[0];
+                        b4[1]=b3[1];
+                        b4[2]=b3[2];
+                        b4[3]=b3[3];
+                        b4[4]=b3[4];
+                        b4[5]=b3[5];
+                        try {
+                            Log.d("LoginActivity", new String(b4, "utf-8"));
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
                     }
-
                 }
             }
         });
@@ -82,6 +113,17 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode==CommonParams.RESULT_ENABLE_BT && resultCode==RESULT_OK) {
             getDevices();
+        }
+    }
+
+    @OnClick({R.id.button_record_packet_number})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.button_record_packet_number:
+                BLEFramework.getBleFrameworkInstance(this).addCommand((byte) 0x90,
+                        new byte[]{(byte) 0x9a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
+                break;
         }
     }
 }

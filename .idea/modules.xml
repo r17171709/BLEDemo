@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/BLEDemo.iml" filepath="$PROJECT_DIR$/BLEDemo.iml" />
-      <module fileurl="file://$PROJECT_DIR$/BLELibrary/blelibrary.iml" filepath="$PROJECT_DIR$/BLELibrary/blelibrary.iml" />
+      <module fileurl="file://$PROJECT_DIR$/BLELibrary/BLELibrary.iml" filepath="$PROJECT_DIR$/BLELibrary/BLELibrary.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

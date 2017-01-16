@@ -18,6 +18,7 @@ import com.renyu.blelibrary.impl.BLEConnectListener;
 import com.renyu.blelibrary.impl.BLEStateChangeListener;
 import com.renyu.blelibrary.params.CommonParams;
 import com.renyu.blelibrary.utils.HexUtil;
+import com.renyu.iitebletest.jniLibs.JNIUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,6 +56,9 @@ public class BLEFramework {
     // 搜索Handler
     private Handler handlerScan;
 
+    // 数据发送队列
+    private static RequestQueue requestQueue;
+
     private Context context;
     private BluetoothManager manager;
     private BluetoothAdapter adapter;
@@ -70,6 +74,7 @@ public class BLEFramework {
             synchronized (BLEFramework.class) {
                 if (bleFramework==null) {
                     bleFramework=new BLEFramework(context.getApplicationContext());
+                    requestQueue=RequestQueue.getQueueInstance(context.getApplicationContext(), bleFramework);
                 }
             }
         }
@@ -143,11 +148,16 @@ public class BLEFramework {
             @Override
             public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
                 super.onCharacteristicWrite(gatt, characteristic, status);
+                if (status==BluetoothGatt.GATT_SUCCESS) {
+                    requestQueue.release();
+                }
             }
 
             @Override
             public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
                 super.onCharacteristicChanged(gatt, characteristic);
+
+                Log.d("BLEService", "收到指令"+characteristic.getValue()[0]+" "+characteristic.getValue()[1]+" "+characteristic.getValue()[2]);
             }
 
             @Override
@@ -259,5 +269,97 @@ public class BLEFramework {
      */
     public ArrayList<BLEDevice> getAllScanDevice() {
         return devices;
+    }
+
+    /**
+     * 发送数据
+     * @param value
+     */
+    protected void writeCharacteristic(byte[] value) {
+        writeCharacteristic(CommonParams.UUID_Characteristic, value);
+    }
+
+    /**
+     * 发送数据
+     * @param uuid
+     * @param value
+     */
+    protected void writeCharacteristic(UUID uuid, byte[] value) {
+        if (gatt!=null) {
+            BluetoothGattCharacteristic characteristic = gatt.getService(CommonParams.UUID_SERVICE).getCharacteristic(uuid);
+            if (characteristic==null) {
+                Log.d("BLEFramework", "writeCharacteristic中uuid不存在");
+                return;
+            }
+            characteristic.setValue(value);
+            if (!gatt.writeCharacteristic(characteristic)) {
+                Log.d("BLEFramework", "writeCharacteristic失败");
+            }
+            else {
+                Log.d("BLEFramework", "writeCharacteristic成功");
+            }
+        }
+    }
+
+    /**
+     * 主动读数据
+     * @param serviceUUID
+     * @param CharacUUID
+     */
+    protected void readCharacteristic(UUID serviceUUID, UUID CharacUUID) {
+        if (gatt!=null) {
+            BluetoothGattCharacteristic characteristic = gatt.getService(serviceUUID).getCharacteristic(CharacUUID);
+            if (characteristic==null) {
+                Log.d("BLEFramework", "readCharacteristic中uuid不存在");
+                return;
+            }
+            if (!gatt.readCharacteristic(characteristic)) {
+                Log.d("BLEFramework", "readCharacteristic失败");
+            }
+            else {
+                Log.d("BLEFramework", "readCharacteristic成功");
+            }
+        }
+    }
+
+    private void addCommand(byte command, byte[] info, int currentPackageSeq, int totalPackageNum) {
+        JNIUtils jniUtils=new JNIUtils();
+        int payloadLength=info.length;
+        byte[] password=jniUtils.sendencode(info, payloadLength);
+        byte[] sendValue=new byte[4+payloadLength+4];
+        sendValue[0]= (byte) currentPackageSeq;
+        sendValue[1]= (byte) totalPackageNum;
+        sendValue[2]= command;
+        sendValue[3]= (byte) payloadLength;
+        for (int i=0;i<payloadLength;i++) {
+            sendValue[4+i]=password[i];
+        }
+        for (int i=0;i<4;i++) {
+            sendValue[4+payloadLength+i]=password[16+i];
+        }
+        requestQueue.add(sendValue);
+    }
+
+    /**
+     * 添加命令
+     * @param command
+     * @param info
+     */
+    public void addCommand(byte command, byte[] info) {
+        if (info.length>12) {
+            byte[] info1=new byte[12];
+            for (int i = 0; i < 12; i++) {
+                info1[i]=info[i];
+            }
+            addCommand(command, info1, 1, 2);
+            byte[] info2=new byte[info.length-12];
+            for (int i=0;i<info.length-12;i++) {
+                info2[i]=info[12+i];
+            }
+            addCommand(command, info2, 2, 2);
+        }
+        else {
+            addCommand(command, info, 1, 1);
+        }
     }
 }

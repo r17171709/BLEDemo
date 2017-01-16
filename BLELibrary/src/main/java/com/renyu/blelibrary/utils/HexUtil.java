@@ -170,4 +170,16 @@ public class HexUtil {
         return (byte) "0123456789ABCDEF".indexOf(c);
     }
 
+    /**
+     * int -> byte[]
+     * @param num
+     * @return
+     */
+    public static byte[] intToBytes(int num) {
+        byte[] b = new byte[2];
+        for (int i = 0; i < 2; i++) {
+            b[i] = (byte) (num >>> (8 - i * 8));
+        }
+        return b;
+    }
 }
