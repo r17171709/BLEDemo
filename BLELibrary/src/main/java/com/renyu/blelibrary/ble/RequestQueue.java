@@ -90,7 +90,6 @@ public class RequestQueue {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                bleFramework.writeCharacteristic(bytes);
                 Log.d("RequestQueue", "添加");
                 delaySubscription= Observable.timer(5, TimeUnit.SECONDS).subscribe(new Consumer<Long>() {
                     @Override
@@ -98,6 +97,7 @@ public class RequestQueue {
                         release();
                     }
                 });
+                bleFramework.writeCharacteristic(bytes);
             }
         };
         Message message=new Message();

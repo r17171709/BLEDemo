@@ -120,9 +120,11 @@ public class MainActivity extends AppCompatActivity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_record_packet_number:
-                BLEFramework.getBleFrameworkInstance(this).addCommand((byte) 0x90,
-                        new byte[]{(byte) 0x9a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
+//                BLEFramework.getBleFrameworkInstance(this).addCommand((byte) 0x9a,
+//                        new byte[]{(byte) 0x9a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+//                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
+                BLEFramework.getBleFrameworkInstance(this).addCommand((byte) 0x9c, new byte[]{(byte) 0x9c, 0x00});
+//                BLEFramework.getBleFrameworkInstance(this).addCommand((byte) 0x9f, new byte[]{(byte) 0x9f, 0x00});
                 break;
         }
     }
