@@ -52,7 +52,7 @@ public class BLEFramework {
     // 临时搜索设备
     private HashMap<String, BLEDevice> tempsDevices;
     // 搜索所需时间
-    private int timeSeconds=10000;
+    private int timeSeconds=5000;
     // 搜索Handler
     private Handler handlerScan;
 
@@ -158,6 +158,7 @@ public class BLEFramework {
                 super.onCharacteristicChanged(gatt, characteristic);
 
                 Log.d("BLEService", "收到指令"+characteristic.getValue()[0]+" "+characteristic.getValue()[1]+" "+characteristic.getValue()[2]);
+                byte[] result=decodeResult(characteristic.getValue());
             }
 
             @Override
@@ -361,5 +362,43 @@ public class BLEFramework {
         else {
             addCommand(command, info, 1, 1);
         }
+    }
+
+    /**
+     * 获取返回解密数据
+     * @param value
+     * @return
+     */
+    public byte[] decodeResult(byte[] value) {
+        int length=-1;
+        for (int i = 0; i < value.length; i++) {
+            if (value[i]==0) {
+                length=i;
+                break;
+            }
+        }
+        if (length==-1) {
+            return new byte[0];
+        }
+        int currentPackageSeq=value[0];
+        int totalPackageNum=value[1];
+        int command=(int) value[2]&0xff;
+        int payloadLength=(int) value[3]-4;
+        byte[] mic=new byte[4];
+        for (int i = 0; i < mic.length; i++) {
+            mic[i]=value[length-4+i];
+        }
+        byte[] password=new byte[16];
+        for (int i = 0; i < 16; i++) {
+            if (i<payloadLength) {
+                password[i]=value[i+4];
+            }
+            else {
+                password[i]=0;
+            }
+        }
+        JNIUtils jniUtils=new JNIUtils();
+        byte[] result=jniUtils.senddecode(password, mic, payloadLength);
+        return result;
     }
 }

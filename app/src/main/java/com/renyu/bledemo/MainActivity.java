@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         jniUtils=new JNIUtils();
 
         bleFramework=BLEFramework.getBleFrameworkInstance(this);
-        bleFramework.setTimeSeconds(30000);
+        bleFramework.setTimeSeconds(4000);
         bleFramework.setBleConnectListener(new BLEConnectListener() {
             @Override
             public void getAllScanDevice(ArrayList<BLEDevice> devices) {
@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
 //                BLEFramework.getBleFrameworkInstance(this).addCommand((byte) 0x9a,
 //                        new byte[]{(byte) 0x9a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 //                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
-//                BLEFramework.getBleFrameworkInstance(this).addCommand((byte) 0x90, new byte[]{(byte) 0x90, 0x00});
+                BLEFramework.getBleFrameworkInstance(this).addCommand((byte) 0x90, new byte[]{(byte) 0x90, 0x00});
 //                BLEFramework.getBleFrameworkInstance(this).addCommand((byte) 0x9f, new byte[]{(byte) 0x9f, 0x00});
                 break;
         }
