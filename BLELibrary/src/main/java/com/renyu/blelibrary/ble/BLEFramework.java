@@ -330,7 +330,7 @@ public class BLEFramework {
         sendValue[0]= (byte) currentPackageSeq;
         sendValue[1]= (byte) totalPackageNum;
         sendValue[2]= command;
-        sendValue[3]= (byte) payloadLength;
+        sendValue[3]= (byte) (payloadLength+4);
         for (int i=0;i<payloadLength;i++) {
             sendValue[4+i]=password[i];
         }
