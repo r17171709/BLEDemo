@@ -1,0 +1,3 @@
+<resources>
+    <string name="permission_camera">为了您可以正常选择头像，\n请点击\"设置\"-\"权限\"-打开 \"存储空间\"与\"相机\" 权限。\n最后点击两次后退按钮，即可返回。</string>
+</resources>

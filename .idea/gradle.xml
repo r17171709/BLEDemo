@@ -9,6 +9,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/BLELibrary" />
+            <option value="$PROJECT_DIR$/QRCodeLibrary" />
             <option value="$PROJECT_DIR$/app" />
           </set>
         </option>

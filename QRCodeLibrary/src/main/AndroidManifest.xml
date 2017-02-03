@@ -1,0 +1,14 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.renyu.qrcodelibrary">
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.FLASHLIGHT" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <application>
+        <activity android:name=".ZxingQRScanActivity" android:screenOrientation="portrait"></activity>
+        <activity android:name=".ZBarQRScanActivity" android:screenOrientation="portrait"></activity>
+    </application>
+
+</manifest>
