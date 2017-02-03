@@ -15,8 +15,8 @@ import android.util.Log;
 
 import com.renyu.blelibrary.bean.BLEDevice;
 import com.renyu.blelibrary.impl.BLEConnectListener;
+import com.renyu.blelibrary.impl.BLEResponseListener;
 import com.renyu.blelibrary.impl.BLEStateChangeListener;
-import com.renyu.blelibrary.params.CommonParams;
 import com.renyu.blelibrary.utils.HexUtil;
 import com.renyu.iitebletest.jniLibs.JNIUtils;
 
@@ -32,6 +32,10 @@ public class BLEFramework {
 
     private static BLEFramework bleFramework;
 
+    // 服务UUID
+    private UUID UUID_SERVICE = null;
+    private UUID UUID_Characteristic = null;
+    private UUID UUID_DESCRIPTOR = null;
     // 设备连接断开
     public static final int STATE_DISCONNECTED = 0;
     // 设备正在扫描
@@ -68,12 +72,14 @@ public class BLEFramework {
 
     private BLEConnectListener bleConnectListener;
     private BLEStateChangeListener bleStateChangeListener;
+    private BLEResponseListener bleResponseListener;
 
-    public static BLEFramework getBleFrameworkInstance(Context context) {
+    public static BLEFramework getBleFrameworkInstance(Context context,
+                                                       UUID UUID_SERVICE, UUID UUID_Characteristic, UUID UUID_DESCRIPTOR) {
         if (bleFramework==null) {
             synchronized (BLEFramework.class) {
                 if (bleFramework==null) {
-                    bleFramework=new BLEFramework(context.getApplicationContext());
+                    bleFramework=new BLEFramework(context.getApplicationContext(), UUID_SERVICE, UUID_Characteristic, UUID_DESCRIPTOR);
                     requestQueue=RequestQueue.getQueueInstance(context.getApplicationContext(), bleFramework);
                 }
             }
@@ -81,8 +87,12 @@ public class BLEFramework {
         return bleFramework;
     }
 
-    public BLEFramework(Context context) {
+    public BLEFramework(Context context,
+                        UUID UUID_SERVICE, UUID UUID_Characteristic, UUID UUID_DESCRIPTOR) {
         this.context=context;
+        this.UUID_SERVICE=UUID_SERVICE;
+        this.UUID_Characteristic=UUID_Characteristic;
+        this.UUID_DESCRIPTOR=UUID_DESCRIPTOR;
         manager= (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
         adapter= manager.getAdapter();
         devices=new ArrayList<>();
@@ -96,6 +106,7 @@ public class BLEFramework {
                         Log.d("onLeScan", device.getAddress());
                         Log.d("onLeScan", HexUtil.encodeHexStr(scanRecord));
                         BLEDevice device1=new BLEDevice();
+                        device1.setRssi(rssi);
                         device1.setDevice(device);
                         device1.setScanRecord(scanRecord);
                         tempsDevices.put(device.getAddress(), device1);
@@ -129,9 +140,9 @@ public class BLEFramework {
                 super.onServicesDiscovered(gatt, status);
                 BLEFramework.this.gatt=gatt;
                 if (status==BluetoothGatt.GATT_SUCCESS) {
-                    if (gatt.getService(CommonParams.UUID_SERVICE)!=null) {
-                        BluetoothGattCharacteristic characteristic = gatt.getService(CommonParams.UUID_SERVICE).getCharacteristic(CommonParams.UUID_Characteristic);
-                        if (enableNotification(characteristic, gatt, CommonParams.UUID_DESCRIPTOR)) {
+                    if (gatt.getService(BLEFramework.this.UUID_SERVICE)!=null) {
+                        BluetoothGattCharacteristic characteristic = gatt.getService(BLEFramework.this.UUID_SERVICE).getCharacteristic(BLEFramework.this.UUID_Characteristic);
+                        if (enableNotification(characteristic, gatt, BLEFramework.this.UUID_DESCRIPTOR)) {
                             setConnectionState(STATE_SERVICES_DISCOVERED);
                             return;
                         }
@@ -156,9 +167,9 @@ public class BLEFramework {
             @Override
             public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
                 super.onCharacteristicChanged(gatt, characteristic);
-
-                Log.d("BLEService", "收到指令"+characteristic.getValue()[0]+" "+characteristic.getValue()[1]+" "+characteristic.getValue()[2]);
-                byte[] result=decodeResult(characteristic.getValue());
+                if (bleResponseListener!=null) {
+                    bleResponseListener.getResponseValues(characteristic.getValue());
+                }
             }
 
             @Override
@@ -195,6 +206,10 @@ public class BLEFramework {
 
     public void setBleStateChangeListener(BLEStateChangeListener bleStateChangeListener) {
         this.bleStateChangeListener = bleStateChangeListener;
+    }
+
+    public void setBleResponseListener(BLEResponseListener bleResponseListener) {
+        this.bleResponseListener = bleResponseListener;
     }
 
     public void setTimeSeconds(int timeSeconds) {
@@ -277,7 +292,7 @@ public class BLEFramework {
      * @param value
      */
     protected void writeCharacteristic(byte[] value) {
-        writeCharacteristic(CommonParams.UUID_Characteristic, value);
+        writeCharacteristic(UUID_Characteristic, value);
     }
 
     /**
@@ -287,7 +302,7 @@ public class BLEFramework {
      */
     protected void writeCharacteristic(UUID uuid, byte[] value) {
         if (gatt!=null) {
-            BluetoothGattCharacteristic characteristic = gatt.getService(CommonParams.UUID_SERVICE).getCharacteristic(uuid);
+            BluetoothGattCharacteristic characteristic = gatt.getService(UUID_SERVICE).getCharacteristic(uuid);
             if (characteristic==null) {
                 Log.d("BLEFramework", "writeCharacteristic中uuid不存在");
                 return;
@@ -398,7 +413,11 @@ public class BLEFramework {
             }
         }
         JNIUtils jniUtils=new JNIUtils();
-        byte[] result=jniUtils.senddecode(password, mic, payloadLength);
+        byte[] temp=jniUtils.senddecode(password, mic, payloadLength);
+        byte[] result=new byte[payloadLength];
+        for (int i=0;i<payloadLength;i++) {
+            result[i]=temp[i];
+        }
         return result;
     }
 }

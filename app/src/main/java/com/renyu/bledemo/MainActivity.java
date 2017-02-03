@@ -12,8 +12,10 @@ import android.widget.Toast;
 import com.renyu.blelibrary.bean.BLEDevice;
 import com.renyu.blelibrary.ble.BLEFramework;
 import com.renyu.blelibrary.impl.BLEConnectListener;
+import com.renyu.blelibrary.impl.BLEResponseListener;
 import com.renyu.blelibrary.impl.BLEStateChangeListener;
 import com.renyu.blelibrary.params.CommonParams;
+import com.renyu.blelibrary.utils.ACache;
 import com.renyu.blelibrary.utils.BLEUtils;
 import com.renyu.iitebletest.jniLibs.JNIUtils;
 
@@ -39,8 +41,11 @@ public class MainActivity extends AppCompatActivity {
 
         jniUtils=new JNIUtils();
 
-        bleFramework=BLEFramework.getBleFrameworkInstance(this);
-        bleFramework.setTimeSeconds(4000);
+        bleFramework=BLEFramework.getBleFrameworkInstance(this,
+                com.renyu.bledemo.params.CommonParams.UUID_SERVICE,
+                com.renyu.bledemo.params.CommonParams.UUID_Characteristic,
+                com.renyu.bledemo.params.CommonParams.UUID_DESCRIPTOR);
+        bleFramework.setTimeSeconds(20000);
         bleFramework.setBleConnectListener(new BLEConnectListener() {
             @Override
             public void getAllScanDevice(ArrayList<BLEDevice> devices) {
@@ -69,6 +74,9 @@ public class MainActivity extends AppCompatActivity {
                         b4[5]=b3[5];
                         try {
                             Log.d("LoginActivity", new String(b4, "utf-8"));
+                            // 存储SN
+                            ACache.get(MainActivity.this).put("sn", new String(b4, "utf-8"));
+                            ACache.get(MainActivity.this).put("rssi", ""+device.getRssi());
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
                         }
@@ -80,6 +88,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void getCurrentState(int currentState) {
 
+            }
+        });
+        bleFramework.setBleResponseListener(new BLEResponseListener() {
+            @Override
+            public void getResponseValues(byte[] value) {
+                Log.d("BLEService", "收到指令"+value[0]+" "+value[1]+" "+value[2]);
+                int result=(int) value[2]&0xff;
+                if (result!=com.renyu.bledemo.params.CommonParams.ERROR_RESP) {
+                    byte[] response=bleFramework.decodeResult(value);
+                }
+                else {
+                    Log.d("MainActivity", "指令出错");
+                }
             }
         });
         openBlueTooth();
@@ -123,8 +144,10 @@ public class MainActivity extends AppCompatActivity {
 //                BLEFramework.getBleFrameworkInstance(this).addCommand((byte) 0x9a,
 //                        new byte[]{(byte) 0x9a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 //                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
-                BLEFramework.getBleFrameworkInstance(this).addCommand((byte) 0x90, new byte[]{(byte) 0x90, 0x00});
+//                bleFramework.addCommand((byte) 0x90, new byte[]{(byte) 0x90, 0x00});
 //                BLEFramework.getBleFrameworkInstance(this).addCommand((byte) 0x9f, new byte[]{(byte) 0x9f, 0x00});
+//                com.renyu.bledemo.params.CommonParams.setSNReq(bleFramework, ACache.get(MainActivity.this).getAsString("sn"));
+                com.renyu.bledemo.params.CommonParams.getDeviceCurrentReq(bleFramework);
                 break;
         }
     }

@@ -182,4 +182,19 @@ public class HexUtil {
         }
         return b;
     }
+
+    /**
+     * 将两个ASCII字符合成一个字节；
+     * 如："EF"--> 0xEF
+     * @param src0
+     * @param src1
+     * @return
+     */
+    public static byte uniteBytes(byte src0, byte src1) {
+        byte _b0 = Byte.decode("0x" + new String(new byte[]{src0})).byteValue();
+        _b0 = (byte)(_b0 << 4);
+        byte _b1 = Byte.decode("0x" + new String(new byte[]{src1})).byteValue();
+        byte ret = (byte)(_b0 ^ _b1);
+        return ret;
+    }
 }

@@ -9,6 +9,7 @@ import android.bluetooth.BluetoothDevice;
 public class BLEDevice {
     BluetoothDevice device;
     byte[] scanRecord;
+    int rssi;
 
     public BluetoothDevice getDevice() {
         return device;
@@ -24,5 +25,13 @@ public class BLEDevice {
 
     public void setScanRecord(byte[] scanRecord) {
         this.scanRecord = scanRecord;
+    }
+
+    public int getRssi() {
+        return rssi;
+    }
+
+    public void setRssi(int rssi) {
+        this.rssi = rssi;
     }
 }
