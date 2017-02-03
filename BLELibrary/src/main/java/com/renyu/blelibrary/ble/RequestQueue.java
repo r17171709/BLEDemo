@@ -11,9 +11,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import io.reactivex.Observable;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
+import rx.Observable;
+import rx.Subscription;
+import rx.functions.Action1;
 
 /**
  * Created by renyu on 2017/1/16.
@@ -29,7 +29,7 @@ public class RequestQueue {
     private Semaphore semaphore;
     private Thread looperThread;
     private Handler looperHandler;
-    private Disposable delaySubscription;
+    private Subscription delaySubscription;
 
     private RequestQueue(Context context, BLEFramework bleFramework) {
         this.context=context;
@@ -52,7 +52,7 @@ public class RequestQueue {
                         // 释放
                         else if (msg.what==0x112) {
                             if (delaySubscription!=null) {
-                                delaySubscription.dispose();
+                                delaySubscription.unsubscribe();
                                 delaySubscription=null;
                             }
                             Log.d("RequestQueue", "已释放");
@@ -91,9 +91,9 @@ public class RequestQueue {
                     e.printStackTrace();
                 }
                 Log.d("RequestQueue", "添加");
-                delaySubscription= Observable.timer(5, TimeUnit.SECONDS).subscribe(new Consumer<Long>() {
+                delaySubscription= Observable.timer(5, TimeUnit.SECONDS).subscribe(new Action1<Long>() {
                     @Override
-                    public void accept(Long aLong) throws Exception {
+                    public void call(Long aLong) {
                         release();
                     }
                 });

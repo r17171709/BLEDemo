@@ -18,7 +18,6 @@ import com.renyu.blelibrary.params.CommonParams;
 import com.renyu.blelibrary.utils.ACache;
 import com.renyu.blelibrary.utils.BLEUtils;
 import com.renyu.iitebletest.jniLibs.JNIUtils;
-import com.renyu.qrcodelibrary.ZBarQRScanActivity;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -148,7 +147,6 @@ public class MainActivity extends AppCompatActivity {
 //                BLEFramework.getBleFrameworkInstance(this).addCommand((byte) 0x9f, new byte[]{(byte) 0x9f, 0x00});
 //                com.renyu.bledemo.params.CommonParams.setSNReq(bleFramework, ACache.get(MainActivity.this).getAsString("sn"));
 //                com.renyu.bledemo.params.CommonParams.getDeviceCurrentReq(bleFramework);
-                startActivity(new Intent(MainActivity.this, ZBarQRScanActivity.class));
                 break;
         }
     }
