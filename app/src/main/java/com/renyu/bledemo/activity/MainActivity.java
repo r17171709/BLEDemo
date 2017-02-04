@@ -1,4 +1,4 @@
-package com.renyu.bledemo;
+package com.renyu.bledemo.activity;
 
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -9,6 +9,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.renyu.bledemo.R;
+import com.renyu.bledemo.utils.DataUtils;
 import com.renyu.blelibrary.bean.BLEDevice;
 import com.renyu.blelibrary.ble.BLEFramework;
 import com.renyu.blelibrary.impl.BLEConnectListener;
@@ -28,8 +30,9 @@ import butterknife.OnClick;
 public class MainActivity extends AppCompatActivity {
 
     ProgressDialog progressDialog;
-    BLEFramework bleFramework;
 
+    BLEFramework bleFramework;
+    DataUtils dataUtils;
     JNIUtils jniUtils;
 
     @Override
@@ -39,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         jniUtils=new JNIUtils();
+        dataUtils=DataUtils.getInstance();
 
         bleFramework=BLEFramework.getBleFrameworkInstance(this,
                 com.renyu.bledemo.params.CommonParams.UUID_SERVICE,
@@ -95,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("BLEService", "收到指令"+value[0]+" "+value[1]+" "+value[2]);
                 int result=(int) value[2]&0xff;
                 if (result!=com.renyu.bledemo.params.CommonParams.ERROR_RESP) {
-                    byte[] response=bleFramework.decodeResult(value);
+                    byte[] response=dataUtils.decodeResult(value);
                 }
                 else {
                     Log.d("MainActivity", "指令出错");
@@ -140,13 +144,10 @@ public class MainActivity extends AppCompatActivity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_record_packet_number:
-//                BLEFramework.getBleFrameworkInstance(this).addCommand((byte) 0x9a,
-//                        new byte[]{(byte) 0x9a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-//                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
-//                bleFramework.addCommand((byte) 0x90, new byte[]{(byte) 0x90, 0x00});
-//                BLEFramework.getBleFrameworkInstance(this).addCommand((byte) 0x9f, new byte[]{(byte) 0x9f, 0x00});
-//                com.renyu.bledemo.params.CommonParams.setSNReq(bleFramework, ACache.get(MainActivity.this).getAsString("sn"));
-//                com.renyu.bledemo.params.CommonParams.getDeviceCurrentReq(bleFramework);
+//                com.renyu.bledemo.params.CommonParams.setSNReq(dataUtils, bleFramework, ACache.get(MainActivity.this).getAsString("sn"));
+//                com.renyu.bledemo.params.CommonParams.setMagicReq(dataUtils, bleFramework, (byte) 0x66);
+//                com.renyu.bledemo.params.CommonParams.readMagicReq(dataUtils, bleFramework);
+                com.renyu.bledemo.params.CommonParams.readSNReq(dataUtils, bleFramework);
                 break;
         }
     }
