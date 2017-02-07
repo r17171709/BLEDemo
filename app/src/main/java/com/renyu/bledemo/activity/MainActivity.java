@@ -32,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
     ProgressDialog progressDialog;
 
     BLEFramework bleFramework;
-    DataUtils dataUtils;
     JNIUtils jniUtils;
 
     @Override
@@ -42,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         jniUtils=new JNIUtils();
-        dataUtils=DataUtils.getInstance();
 
         bleFramework=BLEFramework.getBleFrameworkInstance(this,
                 com.renyu.bledemo.params.CommonParams.UUID_SERVICE,
@@ -99,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("BLEService", "收到指令"+value[0]+" "+value[1]+" "+value[2]);
                 int result=(int) value[2]&0xff;
                 if (result!=com.renyu.bledemo.params.CommonParams.ERROR_RESP) {
-                    byte[] response=dataUtils.decodeResult(value);
+                    byte[] response=DataUtils.decodeResult(value);
                 }
                 else {
                     Log.d("MainActivity", "指令出错");
@@ -144,10 +142,12 @@ public class MainActivity extends AppCompatActivity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_record_packet_number:
-//                com.renyu.bledemo.params.CommonParams.setSNReq(dataUtils, bleFramework, ACache.get(MainActivity.this).getAsString("sn"));
-//                com.renyu.bledemo.params.CommonParams.setMagicReq(dataUtils, bleFramework, (byte) 0x66);
-//                com.renyu.bledemo.params.CommonParams.readMagicReq(dataUtils, bleFramework);
-                com.renyu.bledemo.params.CommonParams.readSNReq(dataUtils, bleFramework);
+//                DataUtils.setSNReq(bleFramework, ACache.get(MainActivity.this).getAsString("sn"));
+//                DataUtils.setMagicReq(bleFramework, (byte) 0x66);
+//                DataUtils.readMagicReq(bleFramework);
+//                DataUtils.readSNReq(bleFramework);
+//                DataUtils.enterOta(bleFramework);
+//                bleFramework.startOTA();
                 break;
         }
     }

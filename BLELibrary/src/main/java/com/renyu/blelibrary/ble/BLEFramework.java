@@ -6,21 +6,28 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import com.cypress.cysmart.CommonUtils.Constants;
+import com.cypress.cysmart.OTAFirmwareUpdate.OTAService;
 import com.renyu.blelibrary.bean.BLEDevice;
 import com.renyu.blelibrary.impl.BLEConnectListener;
 import com.renyu.blelibrary.impl.BLEResponseListener;
 import com.renyu.blelibrary.impl.BLEStateChangeListener;
+import com.renyu.blelibrary.params.CommonParams;
 import com.renyu.blelibrary.utils.HexUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -47,6 +54,8 @@ public class BLEFramework {
     public static final int STATE_CONNECTED = 4;
     // 设备配置服务成功
     public static final int STATE_SERVICES_DISCOVERED = 5;
+    // 设备配置OTA服务成功
+    public static final int STATE_SERVICES_OTA_DISCOVERED = 6;
     // 当前设备状态
     private int connectionState=STATE_DISCONNECTED;
 
@@ -68,6 +77,11 @@ public class BLEFramework {
     private BluetoothAdapter.LeScanCallback leScanCallback;
     private BluetoothGattCallback bleGattCallback;
     private BluetoothGatt gatt;
+    // OTA服务所需Characteristic
+    private BluetoothGattCharacteristic mOTACharacteristic;
+    // OTA服务所需连接设备的地址
+    private String mBluetoothDeviceAddress;
+    private boolean m_otaExitBootloaderCmdInProgress = false;
 
     private BLEConnectListener bleConnectListener;
     private BLEStateChangeListener bleStateChangeListener;
@@ -86,7 +100,14 @@ public class BLEFramework {
         return bleFramework;
     }
 
-    public BLEFramework(Context context,
+    public static BLEFramework getBleFrameworkInstance() {
+        if (bleFramework==null) {
+            throw new RuntimeException("不可使用的构造方法");
+        }
+        return bleFramework;
+    }
+
+    public BLEFramework(final Context context,
                         UUID UUID_SERVICE, UUID UUID_Characteristic, UUID UUID_DESCRIPTOR) {
         this.context=context;
         this.UUID_SERVICE=UUID_SERVICE;
@@ -139,11 +160,23 @@ public class BLEFramework {
                 super.onServicesDiscovered(gatt, status);
                 BLEFramework.this.gatt=gatt;
                 if (status==BluetoothGatt.GATT_SUCCESS) {
-                    if (gatt.getService(BLEFramework.this.UUID_SERVICE)!=null) {
-                        BluetoothGattCharacteristic characteristic = gatt.getService(BLEFramework.this.UUID_SERVICE).getCharacteristic(BLEFramework.this.UUID_Characteristic);
-                        if (enableNotification(characteristic, gatt, BLEFramework.this.UUID_DESCRIPTOR)) {
-                            setConnectionState(STATE_SERVICES_DISCOVERED);
-                            return;
+                    if (checkIsOTA()) {
+                        if (gatt.getService(CommonParams.UUID_SERVICE_OTASERVICE)!=null) {
+                            BluetoothGattCharacteristic characteristic = gatt.getService(CommonParams.UUID_SERVICE_OTASERVICE).getCharacteristic(CommonParams.UUID_SERVICE_OTA);
+                            if (enableNotification(characteristic, gatt, CommonParams.UUID_DESCRIPTOR_OTA)) {
+                                mOTACharacteristic = characteristic;
+                                setConnectionState(STATE_SERVICES_OTA_DISCOVERED);
+                                return;
+                            }
+                        }
+                    }
+                    else {
+                        if (gatt.getService(BLEFramework.this.UUID_SERVICE)!=null) {
+                            BluetoothGattCharacteristic characteristic = gatt.getService(BLEFramework.this.UUID_SERVICE).getCharacteristic(BLEFramework.this.UUID_Characteristic);
+                            if (enableNotification(characteristic, gatt, BLEFramework.this.UUID_DESCRIPTOR)) {
+                                setConnectionState(STATE_SERVICES_DISCOVERED);
+                                return;
+                            }
                         }
                     }
                 }
@@ -161,13 +194,38 @@ public class BLEFramework {
                 if (status==BluetoothGatt.GATT_SUCCESS) {
                     requestQueue.release();
                 }
+
+                boolean isExitBootloaderCmd = false;
+                synchronized (BLEFramework.class) {
+                    isExitBootloaderCmd = m_otaExitBootloaderCmdInProgress;
+                    if(m_otaExitBootloaderCmdInProgress)
+                        m_otaExitBootloaderCmdInProgress = false;
+                }
+                if(isExitBootloaderCmd) {
+                    Intent intent=new Intent(context, OTAService.class);
+                    intent.putExtra("command", 2);
+                    intent.putExtra("status", status);
+                    context.startService(intent);
+                }
             }
 
             @Override
             public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
                 super.onCharacteristicChanged(gatt, characteristic);
-                if (bleResponseListener!=null) {
-                    bleResponseListener.getResponseValues(characteristic.getValue());
+
+                //ota的指令
+                if (CommonParams.UUID_SERVICE_OTA.toString().equals(characteristic.getUuid().toString())) {
+                    Intent intentOTA = new Intent(CommonParams.ACTION_OTA_DATA_AVAILABLE);
+                    Bundle mBundle = new Bundle();
+                    mBundle.putByteArray(Constants.EXTRA_BYTE_VALUE, characteristic.getValue());
+                    mBundle.putString(Constants.EXTRA_BYTE_UUID_VALUE, characteristic.getUuid().toString());
+                    intentOTA.putExtras(mBundle);
+                    BLEFramework.this.context.sendBroadcast(intentOTA);
+                }
+                else {
+                    if (bleResponseListener!=null) {
+                        bleResponseListener.getResponseValues(characteristic.getValue());
+                    }
                 }
             }
 
@@ -179,6 +237,7 @@ public class BLEFramework {
     }
 
     private void disConnect() {
+        mBluetoothDeviceAddress = null;
         if (gatt!=null)
         gatt.disconnect();
     }
@@ -254,6 +313,7 @@ public class BLEFramework {
      * @param device
      */
     public void startConn(BluetoothDevice device) {
+        mBluetoothDeviceAddress = device.getAddress();
         // 开始连接
         setConnectionState(STATE_CONNECTING);
         device.connectGatt(context, false, bleGattCallback);
@@ -344,4 +404,48 @@ public class BLEFramework {
     public void addCommand(byte[] sendValue) {
         requestQueue.add(sendValue);
     }
+
+    /**
+     * 检查是否进入OTA模式
+     */
+    public boolean checkIsOTA() {
+        List<BluetoothGattService> gattServices=gatt.getServices();
+        for (BluetoothGattService gattService : gattServices) {
+            Log.d("BLEService", gattService.getUuid().toString());
+            if (gattService.getUuid().toString().equals(CommonParams.UUID_SERVICE_OTASERVICE.toString())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 开启OTA模式
+     */
+    public void startOTA() {
+        Intent intent=new Intent(context, OTAService.class);
+        intent.putExtra("command", 1);
+        context.startService(intent);
+    }
+
+    /**************  提供给OTA服务使用的对象  ****************/
+    public BluetoothGatt getCurrentGattInstance() {
+        if (gatt==null) throw new RuntimeException("BLE服务没有启动");
+        return gatt;
+    }
+
+    public BluetoothGattCharacteristic getCurrentCharacteristic() {
+        if (mOTACharacteristic==null) throw new RuntimeException("BLE服务没有启动");
+        return mOTACharacteristic;
+    }
+
+    public String getMBluetoothDeviceAddress() {
+        if (mBluetoothDeviceAddress==null) throw new RuntimeException("BLE服务没有启动");
+        return mBluetoothDeviceAddress;
+    }
+
+    public void setM_otaExitBootloaderCmdInProgress(boolean m_otaExitBootloaderCmdInProgress) {
+        this.m_otaExitBootloaderCmdInProgress=m_otaExitBootloaderCmdInProgress;
+    }
+
 }

@@ -1,6 +1,8 @@
 package com.renyu.bledemo.utils;
 
+import com.renyu.bledemo.params.CommonParams;
 import com.renyu.blelibrary.ble.BLEFramework;
+import com.renyu.blelibrary.utils.HexUtil;
 import com.renyu.iitebletest.jniLibs.JNIUtils;
 
 /**
@@ -9,20 +11,7 @@ import com.renyu.iitebletest.jniLibs.JNIUtils;
 
 public class DataUtils {
 
-    private static volatile DataUtils dataUtils;
-
-    public static DataUtils getInstance() {
-        if (dataUtils==null) {
-            synchronized (DataUtils.class) {
-                if (dataUtils==null) {
-                    dataUtils=new DataUtils();
-                }
-            }
-        }
-        return dataUtils;
-    }
-
-    private void addCommand(BLEFramework bleFramework, byte command, byte[] info, int currentPackageSeq, int totalPackageNum) {
+    private static void addCommand(BLEFramework bleFramework, byte command, byte[] info, int currentPackageSeq, int totalPackageNum) {
         JNIUtils jniUtils=new JNIUtils();
         int payloadLength=info.length;
         byte[] password=jniUtils.sendencode(info, payloadLength);
@@ -45,7 +34,7 @@ public class DataUtils {
      * @param command
      * @param info
      */
-    public void addCommand(BLEFramework bleFramework, byte command, byte[] info) {
+    private static void addCommand(BLEFramework bleFramework, byte command, byte[] info) {
         if (info.length>12) {
             byte[] info1=new byte[12];
             for (int i = 0; i < 12; i++) {
@@ -68,7 +57,7 @@ public class DataUtils {
      * @param value
      * @return
      */
-    public byte[] decodeResult(byte[] value) {
+    public static byte[] decodeResult(byte[] value) {
         int length=-1;
         for (int i = 0; i < value.length; i++) {
             if (value[i]==0) {
@@ -103,5 +92,53 @@ public class DataUtils {
             result[i]=temp[i];
         }
         return result;
+    }
+
+
+    public static void setSNReq(BLEFramework bleFramework, String sn) {
+        char[] chars= HexUtil.encodeHex(sn.getBytes());
+        byte[] bytes=new byte[chars.length/2+2];
+        bytes[0]= (byte) CommonParams.SET_SN_REQ;
+        bytes[1]=1;
+        for (int i = 0; i < chars.length/2; i++) {
+            bytes[i+2]=HexUtil.uniteBytes((byte) (chars[i*2] & 0xFF), (byte) (chars[i*2+1] & 0xFF));
+        }
+        addCommand(bleFramework, (byte) CommonParams.SET_SN_REQ, bytes);
+    }
+
+    public static void readSNReq(BLEFramework bleFramework) {
+        byte[] bytes=new byte[8];
+        bytes[0]= (byte) CommonParams.SET_SN_REQ;
+        bytes[1]=0;
+        for (int i = 0; i < 6; i++) {
+            bytes[i+2]=0x00;
+        }
+        addCommand(bleFramework, (byte) CommonParams.SET_SN_REQ, bytes);
+    }
+
+    public static void getDeviceCurrentReq(BLEFramework bleFramework) {
+        addCommand(bleFramework, (byte) CommonParams.GET_DEVICE_CURRENT_REQ, new byte[]{0x00});
+    }
+
+    public static void setMagicReq(BLEFramework bleFramework, byte magic) {
+        byte[] bytes=new byte[3];
+        bytes[0]= (byte) CommonParams.SET_MAGIC_REQ;
+        bytes[1]=1;
+        bytes[2]=magic;
+        addCommand(bleFramework, (byte) CommonParams.SET_MAGIC_REQ, bytes);
+    }
+
+    public static void readMagicReq(BLEFramework bleFramework) {
+        byte[] bytes=new byte[3];
+        bytes[0]= (byte) CommonParams.SET_MAGIC_REQ;
+        bytes[1]=0;
+        bytes[2]=0x00;
+        addCommand(bleFramework, (byte) CommonParams.SET_MAGIC_REQ, bytes);
+    }
+
+    public static void enterOta(BLEFramework bleFramework) {
+        byte[] bytes=new byte[1];
+        bytes[0]=(byte) 0x90;
+        bleFramework.addCommand(bytes);
     }
 }
