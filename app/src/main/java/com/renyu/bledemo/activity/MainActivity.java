@@ -4,13 +4,16 @@ import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.renyu.bledemo.R;
+import com.renyu.bledemo.params.AddRequestBean;
 import com.renyu.bledemo.utils.DataUtils;
+import com.renyu.bledemo.utils.ExcelUtils;
 import com.renyu.blelibrary.bean.BLEDevice;
 import com.renyu.blelibrary.ble.BLEFramework;
 import com.renyu.blelibrary.impl.BLEConnectListener;
@@ -23,6 +26,7 @@ import com.renyu.iitebletest.jniLibs.JNIUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -104,7 +108,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        openBlueTooth();
     }
 
     /**
@@ -138,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @OnClick({R.id.button_record_packet_number})
+    @OnClick({R.id.button_record_packet_number, R.id.button_start_search, R.id.button_save_to_excel})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_record_packet_number:
@@ -148,6 +151,20 @@ public class MainActivity extends AppCompatActivity {
 //                DataUtils.readSNReq(bleFramework);
 //                DataUtils.enterOta(bleFramework);
 //                bleFramework.startOTA();
+                break;
+            case R.id.button_start_search:
+                openBlueTooth();
+                break;
+            case R.id.button_save_to_excel:
+                List<AddRequestBean> beanList=new ArrayList<>();
+                for (int i=0;i<10;i++) {
+                    AddRequestBean bean=new AddRequestBean();
+                    bean.setSn("123");
+                    bean.setTestResult("OK");
+                    bean.setTestDate("2017.1.1");
+                    beanList.add(bean);
+                }
+                ExcelUtils.writeExcel(Environment.getExternalStorageDirectory().getPath(), beanList);
                 break;
         }
     }
