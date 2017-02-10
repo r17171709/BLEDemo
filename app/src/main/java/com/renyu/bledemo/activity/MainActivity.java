@@ -2,9 +2,12 @@ package com.renyu.bledemo.activity;
 
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -24,7 +27,8 @@ import com.renyu.blelibrary.utils.ACache;
 import com.renyu.blelibrary.utils.BLEUtils;
 import com.renyu.iitebletest.jniLibs.JNIUtils;
 
-import java.io.UnsupportedEncodingException;
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,10 +37,26 @@ import butterknife.OnClick;
 
 public class MainActivity extends AppCompatActivity {
 
-    ProgressDialog progressDialog;
-
     BLEFramework bleFramework;
     JNIUtils jniUtils;
+
+    ProgressDialog progressDialog;
+
+    Handler handler=new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (msg.what==com.renyu.blelibrary.ble.BLEFramework.STATE_SERVICES_DISCOVERED
+                    || msg.what==com.renyu.blelibrary.ble.BLEFramework.STATE_SERVICES_OTA_DISCOVERED) {
+                Toast.makeText(MainActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
+            }
+            else if (msg.what==com.renyu.blelibrary.ble.BLEFramework.STATE_DISCONNECTED) {
+                Toast.makeText(MainActivity.this, "连接失败", Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,41 +70,17 @@ public class MainActivity extends AppCompatActivity {
                 com.renyu.bledemo.params.CommonParams.UUID_SERVICE,
                 com.renyu.bledemo.params.CommonParams.UUID_Characteristic,
                 com.renyu.bledemo.params.CommonParams.UUID_DESCRIPTOR);
-        bleFramework.setTimeSeconds(20000);
+        bleFramework.setTimeSeconds(10000);
         bleFramework.setBleConnectListener(new BLEConnectListener() {
             @Override
             public void getAllScanDevice(ArrayList<BLEDevice> devices) {
                 Log.d("MainActivity", "devices.size():" + devices.size());
-                progressDialog.dismiss();
                 for (BLEDevice device : devices) {
                     byte[] scanRecord=device.getScanRecord();
                     int a=(int) scanRecord[5]&0xff;
                     int b=(int) scanRecord[6]&0xff;
                     if (a==0xaa && b==0xfe) {
-                        bleFramework.startConn(device.getDevice());
-                        byte[] password={scanRecord[11], scanRecord[12], scanRecord[13],
-                                scanRecord[14], scanRecord[15], scanRecord[16], scanRecord[17],
-                                scanRecord[18], scanRecord[19], scanRecord[20], scanRecord[21],
-                                scanRecord[22], scanRecord[23], scanRecord[24], scanRecord[25],
-                                scanRecord[26]};
-                        byte[] mic={scanRecord[27], scanRecord[28], scanRecord[29],
-                                scanRecord[30]};
-                        byte[] b3=jniUtils.senddecode(password, mic, 16);
-                        byte[] b4=new byte[6];
-                        b4[0]=b3[0];
-                        b4[1]=b3[1];
-                        b4[2]=b3[2];
-                        b4[3]=b3[3];
-                        b4[4]=b3[4];
-                        b4[5]=b3[5];
-                        try {
-                            Log.d("LoginActivity", new String(b4, "utf-8"));
-                            // 存储SN
-                            ACache.get(MainActivity.this).put("sn", new String(b4, "utf-8"));
-                            ACache.get(MainActivity.this).put("rssi", ""+device.getRssi());
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                        }
+                        EventBus.getDefault().post(device);
                     }
                 }
             }
@@ -92,7 +88,9 @@ public class MainActivity extends AppCompatActivity {
         bleFramework.setBleStateChangeListener(new BLEStateChangeListener() {
             @Override
             public void getCurrentState(int currentState) {
-
+                Message message=new Message();
+                message.what=currentState;
+                handler.sendMessage(message);
             }
         });
         bleFramework.setBleResponseListener(new BLEResponseListener() {
@@ -129,8 +127,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getDevices() {
-        progressDialog= ProgressDialog.show(MainActivity.this, "提示", "正在扫描");
         bleFramework.startScan();
+
+        startActivityForResult(new Intent(MainActivity.this, DeviceListActivity.class), com.renyu.bledemo.params.CommonParams.SCANDEVICE);
     }
 
     @Override
@@ -139,6 +138,18 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode==CommonParams.RESULT_ENABLE_BT && resultCode==RESULT_OK) {
             getDevices();
         }
+        else if (requestCode==com.renyu.bledemo.params.CommonParams.SCANDEVICE && resultCode==RESULT_OK) {
+            BluetoothDevice bleDevice=data.getParcelableExtra("device");
+            // 存储SN
+            ACache.get(MainActivity.this).put("sn", data.getStringExtra("sn"));
+            // rssi
+            ACache.get(MainActivity.this).put("rssi", ""+data.getIntExtra("rssi", 0));
+            bleFramework.startConn(bleDevice);
+            progressDialog= ProgressDialog.show(MainActivity.this, "提示", "正在连接");
+        }
+        else if (requestCode==com.renyu.bledemo.params.CommonParams.SCANDEVICE && resultCode==RESULT_CANCELED) {
+            bleFramework.cancelScan();
+        }
     }
 
     @OnClick({R.id.button_record_packet_number, R.id.button_start_search, R.id.button_save_to_excel})
@@ -146,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
         switch (view.getId()) {
             case R.id.button_record_packet_number:
 //                DataUtils.setSNReq(bleFramework, ACache.get(MainActivity.this).getAsString("sn"));
-//                DataUtils.setMagicReq(bleFramework, (byte) 0x66);
+                DataUtils.setMagicReq(bleFramework, (byte) 0x66);
 //                DataUtils.readMagicReq(bleFramework);
 //                DataUtils.readSNReq(bleFramework);
 //                DataUtils.enterOta(bleFramework);

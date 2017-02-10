@@ -193,6 +193,9 @@ public class BLEFramework {
                 super.onCharacteristicWrite(gatt, characteristic, status);
                 if (status==BluetoothGatt.GATT_SUCCESS) {
                     requestQueue.release();
+                    if (!checkIsOTA()) {
+                        return;
+                    }
                 }
 
                 boolean isExitBootloaderCmd = false;
@@ -309,6 +312,15 @@ public class BLEFramework {
     }
 
     /**
+     * 取消扫描
+     */
+    public void cancelScan() {
+        adapter.stopLeScan(leScanCallback);
+        handlerScan.removeCallbacksAndMessages(null);
+        setConnectionState(STATE_DISCONNECTED);
+    }
+
+    /**
      * 开始连接
      * @param device
      */
@@ -409,13 +421,13 @@ public class BLEFramework {
      * 检查是否进入OTA模式
      */
     public boolean checkIsOTA() {
-        List<BluetoothGattService> gattServices=gatt.getServices();
-        for (BluetoothGattService gattService : gattServices) {
-            Log.d("BLEService", gattService.getUuid().toString());
-            if (gattService.getUuid().toString().equals(CommonParams.UUID_SERVICE_OTASERVICE.toString())) {
-                return true;
-            }
-        }
+//        List<BluetoothGattService> gattServices=gatt.getServices();
+//        for (BluetoothGattService gattService : gattServices) {
+//            Log.d("BLEService", gattService.getUuid().toString());
+//            if (gattService.getUuid().toString().equals(CommonParams.UUID_SERVICE_OTASERVICE.toString())) {
+//                return true;
+//            }
+//        }
         return false;
     }
 

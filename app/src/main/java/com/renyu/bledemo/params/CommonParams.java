@@ -18,4 +18,6 @@ public class CommonParams {
     public static final int SET_MAGIC_REQ=0xa9;
     public static final int SET_MAGIC_RESP=0xaa;
     public static final int GET_DEVICE_CURRENT_REQ=0x9c;
+
+    public static final int SCANDEVICE=1001;
 }
