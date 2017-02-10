@@ -1,5 +1,6 @@
 package com.renyu.qrcodelibrary;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.annotation.Nullable;
@@ -26,6 +27,7 @@ public class ZBarQRScanActivity extends AppCompatActivity {
         setContentView(R.layout.activity_zbarqrscan);
         ButterKnife.bind(this);
 
+        zbar_scan_view.changeToScanBarcodeStyle();
         zbar_scan_view.setDelegate(new QRCodeView.Delegate() {
             @Override
             public void onScanQRCodeSuccess(String result) {
@@ -33,6 +35,11 @@ public class ZBarQRScanActivity extends AppCompatActivity {
                 Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
                 vibrator.vibrate(200);
                 zbar_scan_view.startSpot();
+
+                Intent intent=new Intent();
+                intent.putExtra("result", result);
+                setResult(RESULT_OK, intent);
+                finish();
             }
 
             @Override

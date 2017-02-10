@@ -20,4 +20,5 @@ public class CommonParams {
     public static final int GET_DEVICE_CURRENT_REQ=0x9c;
 
     public static final int SCANDEVICE=1001;
+    public static final int QRCODESCAN=1002;
 }

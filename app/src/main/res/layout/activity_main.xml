@@ -36,18 +36,18 @@
         android:layout_width="384dp"
         android:layout_height="wrap_content"
         android:id="@+id/guideline3"
-        app:layout_constraintGuide_begin="350dp"
+        app:layout_constraintGuide_begin="396dp"
         android:orientation="horizontal"
-        tools:layout_editor_absoluteY="350dp"
+        tools:layout_editor_absoluteY="396dp"
         tools:layout_editor_absoluteX="0dp" />
 
     <android.support.constraint.Guideline
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/guideline4"
-        app:layout_constraintGuide_begin="159dp"
+        app:layout_constraintGuide_begin="117dp"
         android:orientation="horizontal"
-        tools:layout_editor_absoluteY="159dp"
+        tools:layout_editor_absoluteY="117dp"
         tools:layout_editor_absoluteX="0dp" />
 
     <Button
@@ -56,6 +56,28 @@
         android:layout_height="wrap_content"
         android:id="@+id/button_save_to_excel"
         app:layout_constraintTop_toTopOf="@+id/guideline4"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginStart="16dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/guideline"
+        android:layout_marginBottom="8dp" />
+
+    <android.support.constraint.Guideline
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/guideline"
+        app:layout_constraintGuide_begin="266dp"
+        android:orientation="horizontal"
+        tools:layout_editor_absoluteY="266dp"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <Button
+        android:text="qrcode scan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/button_qrcode_scan"
+        app:layout_constraintTop_toTopOf="@+id/guideline"
         app:layout_constraintBottom_toTopOf="@+id/guideline3"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="16dp"

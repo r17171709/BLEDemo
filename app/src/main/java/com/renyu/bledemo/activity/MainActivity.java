@@ -26,6 +26,7 @@ import com.renyu.blelibrary.params.CommonParams;
 import com.renyu.blelibrary.utils.ACache;
 import com.renyu.blelibrary.utils.BLEUtils;
 import com.renyu.iitebletest.jniLibs.JNIUtils;
+import com.renyu.qrcodelibrary.ZBarQRScanActivity;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -42,18 +43,27 @@ public class MainActivity extends AppCompatActivity {
 
     ProgressDialog progressDialog;
 
+    String scanTarget;
+
     Handler handler=new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            if (msg.what==com.renyu.blelibrary.ble.BLEFramework.STATE_SERVICES_DISCOVERED
-                    || msg.what==com.renyu.blelibrary.ble.BLEFramework.STATE_SERVICES_OTA_DISCOVERED) {
-                Toast.makeText(MainActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
-                progressDialog.dismiss();
+            if (msg.what==BLEFramework.STATE_SERVICES_DISCOVERED
+                    || msg.what==BLEFramework.STATE_SERVICES_OTA_DISCOVERED) {
+                if (progressDialog!=null) {
+                    progressDialog.dismiss();
+                    Toast.makeText(MainActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
+                }
             }
-            else if (msg.what==com.renyu.blelibrary.ble.BLEFramework.STATE_DISCONNECTED) {
-                Toast.makeText(MainActivity.this, "连接失败", Toast.LENGTH_SHORT).show();
-                progressDialog.dismiss();
+            else if (msg.what==BLEFramework.STATE_DISCONNECTED) {
+                if (progressDialog!=null) {
+                    progressDialog.dismiss();
+                    Toast.makeText(MainActivity.this, "连接失败", Toast.LENGTH_SHORT).show();
+                }
+            }
+            else if (msg.what== BLEFramework.STATE_SCANNED) {
+                EventBus.getDefault().post(""+BLEFramework.STATE_SCANNED);
             }
         }
     };
@@ -111,10 +121,10 @@ public class MainActivity extends AppCompatActivity {
     /**
      * 打开蓝牙开关
      */
-    public void openBlueTooth() {
+    public void openBlueTooth(String scanTarget) {
         if (BLEUtils.checkBluetoothAvaliable(this)) {
             if (BLEUtils.checkBluetoothOpen(this)) {
-                getDevices();
+                getDevices(scanTarget);
             }
             else {
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -126,17 +136,23 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void getDevices() {
+    private void getDevices(String scanTarget) {
         bleFramework.startScan();
 
-        startActivityForResult(new Intent(MainActivity.this, DeviceListActivity.class), com.renyu.bledemo.params.CommonParams.SCANDEVICE);
+        Intent intent=new Intent(MainActivity.this, DeviceListActivity.class);
+        if (scanTarget!=null) {
+            intent.putExtra("scanTarget", scanTarget);
+        }
+        startActivityForResult(intent, com.renyu.bledemo.params.CommonParams.SCANDEVICE);
+
+        MainActivity.this.scanTarget=null;
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode==CommonParams.RESULT_ENABLE_BT && resultCode==RESULT_OK) {
-            getDevices();
+            getDevices(scanTarget);
         }
         else if (requestCode==com.renyu.bledemo.params.CommonParams.SCANDEVICE && resultCode==RESULT_OK) {
             BluetoothDevice bleDevice=data.getParcelableExtra("device");
@@ -150,9 +166,14 @@ public class MainActivity extends AppCompatActivity {
         else if (requestCode==com.renyu.bledemo.params.CommonParams.SCANDEVICE && resultCode==RESULT_CANCELED) {
             bleFramework.cancelScan();
         }
+        else if (requestCode==com.renyu.bledemo.params.CommonParams.QRCODESCAN && resultCode==RESULT_OK) {
+            String result=data.getStringExtra("result");
+            scanTarget=result;
+            openBlueTooth(result);
+        }
     }
 
-    @OnClick({R.id.button_record_packet_number, R.id.button_start_search, R.id.button_save_to_excel})
+    @OnClick({R.id.button_record_packet_number, R.id.button_start_search, R.id.button_save_to_excel, R.id.button_qrcode_scan})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_record_packet_number:
@@ -164,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
 //                bleFramework.startOTA();
                 break;
             case R.id.button_start_search:
-                openBlueTooth();
+                openBlueTooth(null);
                 break;
             case R.id.button_save_to_excel:
                 List<AddRequestBean> beanList=new ArrayList<>();
@@ -176,6 +197,9 @@ public class MainActivity extends AppCompatActivity {
                     beanList.add(bean);
                 }
                 ExcelUtils.writeExcel(Environment.getExternalStorageDirectory().getPath(), beanList);
+                break;
+            case R.id.button_qrcode_scan:
+                startActivityForResult(new Intent(MainActivity.this, ZBarQRScanActivity.class), com.renyu.bledemo.params.CommonParams.QRCODESCAN);
                 break;
         }
     }
