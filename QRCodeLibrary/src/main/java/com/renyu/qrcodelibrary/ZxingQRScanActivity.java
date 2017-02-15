@@ -27,7 +27,7 @@ public class ZxingQRScanActivity extends AppCompatActivity {
         setContentView(R.layout.activity_zxingqrscan);
         ButterKnife.bind(this);
 
-        zxing_scan_view.changeToScanBarcodeStyle();
+//        zxing_scan_view.changeToScanBarcodeStyle();
         zxing_scan_view.setDelegate(new QRCodeView.Delegate() {
             @Override
             public void onScanQRCodeSuccess(String result) {

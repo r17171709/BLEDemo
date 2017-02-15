@@ -5,18 +5,21 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.renyu.bledemo.R;
 import com.renyu.bledemo.params.AddRequestBean;
 import com.renyu.bledemo.utils.DataUtils;
 import com.renyu.bledemo.utils.ExcelUtils;
+import com.renyu.bledemo.utils.ReamlUtils;
 import com.renyu.blelibrary.bean.BLEDevice;
 import com.renyu.blelibrary.ble.BLEFramework;
 import com.renyu.blelibrary.impl.BLEConnectListener;
@@ -30,9 +33,11 @@ import com.renyu.qrcodelibrary.ZBarQRScanActivity;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -41,6 +46,12 @@ public class MainActivity extends AppCompatActivity {
     BLEFramework bleFramework;
     JNIUtils jniUtils;
 
+    @BindView(R.id.ble_state)
+    TextView ble_state;
+    @BindView(R.id.edit_machineid)
+    EditText edit_machineid;
+    @BindView(R.id.search_deviceid_result)
+    TextView search_deviceid_result;
     ProgressDialog progressDialog;
 
     String scanTarget;
@@ -55,12 +66,14 @@ public class MainActivity extends AppCompatActivity {
                     progressDialog.dismiss();
                     Toast.makeText(MainActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
                 }
+                ble_state.setText("BLE状态：连接成功");
             }
             else if (msg.what==BLEFramework.STATE_DISCONNECTED) {
                 if (progressDialog!=null) {
                     progressDialog.dismiss();
                     Toast.makeText(MainActivity.this, "连接失败", Toast.LENGTH_SHORT).show();
                 }
+                ble_state.setText("BLE状态：连接断开");
             }
             else if (msg.what== BLEFramework.STATE_SCANNED) {
                 EventBus.getDefault().post(""+BLEFramework.STATE_SCANNED);
@@ -110,6 +123,14 @@ public class MainActivity extends AppCompatActivity {
                 int result=(int) value[2]&0xff;
                 if (result!=com.renyu.bledemo.params.CommonParams.ERROR_RESP) {
                     byte[] response=DataUtils.decodeResult(value);
+                    if ((response[0]&0xff) == com.renyu.bledemo.params.CommonParams.SET_DEVICEID_RESP) {
+                        if ((int) response[2]==1) {
+                            ACache.get(MainActivity.this).put("ble_check", "Pass");
+                        }
+                        else {
+                            ACache.get(MainActivity.this).put("ble_check", "Fail");
+                        }
+                    }
                 }
                 else {
                     Log.d("MainActivity", "指令出错");
@@ -173,33 +194,99 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @OnClick({R.id.button_record_packet_number, R.id.button_start_search, R.id.button_save_to_excel, R.id.button_qrcode_scan})
+    @OnClick({R.id.button_setdeviceid, R.id.button_start_search,
+            R.id.read_from_excel, R.id.button_save_to_excel, R.id.button_qrcode_scan,
+            R.id.search_deviceid})
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.button_record_packet_number:
+            case R.id.button_setdeviceid:
 //                DataUtils.setSNReq(bleFramework, ACache.get(MainActivity.this).getAsString("sn"));
-                DataUtils.setMagicReq(bleFramework, (byte) 0x66);
+//                DataUtils.setMagicReq(bleFramework, (byte) 0x66);
 //                DataUtils.readMagicReq(bleFramework);
 //                DataUtils.readSNReq(bleFramework);
 //                DataUtils.enterOta(bleFramework);
 //                bleFramework.startOTA();
+                if (!ble_state.getText().toString().equals("BLE状态：连接断开")) {
+                    DataUtils.setDeviceId(bleFramework, ACache.get(MainActivity.this).getAsString("deviceId"));
+                }
+                else {
+                    Toast.makeText(this, "BLE连接断开，暂时无法发送", Toast.LENGTH_SHORT).show();
+                }
                 break;
             case R.id.button_start_search:
                 openBlueTooth(null);
                 break;
             case R.id.button_save_to_excel:
-                List<AddRequestBean> beanList=new ArrayList<>();
-                for (int i=0;i<10;i++) {
-                    AddRequestBean bean=new AddRequestBean();
-                    bean.setSn("123");
-                    bean.setTestResult("OK");
-                    bean.setTestDate("2017.1.1");
-                    beanList.add(bean);
+                if (ACache.get(MainActivity.this).getAsString("sn")==null ||
+                        ACache.get(MainActivity.this).getAsString("deviceId")==null ||
+                        ACache.get(MainActivity.this).getAsString("ble_check")==null) {
+                    Toast.makeText(this, "暂无sn与deviceId信息，不能保存", Toast.LENGTH_SHORT).show();
                 }
-                ExcelUtils.writeExcel(Environment.getExternalStorageDirectory().getPath(), beanList);
+                else {
+                    AddRequestBean bean=new AddRequestBean();
+                    bean.setSn(ACache.get(MainActivity.this).getAsString("sn"));
+                    bean.setDeviceID(ACache.get(MainActivity.this).getAsString("deviceId"));
+                    bean.setTestResult(ACache.get(MainActivity.this).getAsString("ble_check"));
+                    SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    bean.setTestDate(dateFormat.format(new Date()));
+                    ExcelUtils.writeExcel(bean);
+                }
+                break;
+            case R.id.read_from_excel:
+                progressDialog= ProgressDialog.show(MainActivity.this, "提示", "正在导入");
+                ArrayList<AddRequestBean> beans=ExcelUtils.readExcel();
+                if (beans.size()==0) {
+                    if (progressDialog!=null) {
+                        progressDialog.dismiss();
+                        progressDialog=null;
+                    }
+                    Toast.makeText(MainActivity.this, "暂无数据", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    ReamlUtils.write(this, beans, new ReamlUtils.OnWriteResultListener() {
+                        @Override
+                        public void onSuccess() {
+                            Toast.makeText(MainActivity.this, "导入成功", Toast.LENGTH_SHORT).show();
+                            if (progressDialog!=null) {
+                                progressDialog.dismiss();
+                                progressDialog=null;
+                            }
+                        }
+
+                        @Override
+                        public void onError(Throwable error) {
+                            Toast.makeText(MainActivity.this, "导入失败", Toast.LENGTH_SHORT).show();
+                            if (progressDialog!=null) {
+                                progressDialog.dismiss();
+                                progressDialog=null;
+                            }
+                        }
+                    });
+                }
                 break;
             case R.id.button_qrcode_scan:
-                startActivityForResult(new Intent(MainActivity.this, ZBarQRScanActivity.class), com.renyu.bledemo.params.CommonParams.QRCODESCAN);
+                if (ACache.get(MainActivity.this).getAsString("deviceId") == null) {
+                    Toast.makeText(this, "请确保deviceId存在", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    startActivityForResult(new Intent(MainActivity.this, ZBarQRScanActivity.class), com.renyu.bledemo.params.CommonParams.QRCODESCAN);
+                }
+                break;
+            case R.id.search_deviceid:
+                if (TextUtils.isEmpty(edit_machineid.getText().toString())) {
+                    Log.d("MainActivity", "请输入机器ID");
+                }
+                else {
+                    ArrayList<AddRequestBean> temps=ReamlUtils.findOne(this, edit_machineid.getText().toString());
+                    if (temps.size()==0) {
+                        search_deviceid_result.setText("查询失败");
+                    }
+                    else {
+                        search_deviceid_result.setText("查询结果："+temps.get(0).getDeviceID());
+                        // 存储deviceId
+                        ACache.get(MainActivity.this).put("deviceId", temps.get(0).getDeviceID());
+                    }
+                }
                 break;
         }
     }

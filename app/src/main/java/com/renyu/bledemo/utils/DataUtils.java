@@ -136,6 +136,16 @@ public class DataUtils {
         addCommand(bleFramework, (byte) CommonParams.SET_MAGIC_REQ, bytes);
     }
 
+    public static void setDeviceId(BLEFramework bleFramework, String deviceId) {
+        byte[] bytes=new byte[18];
+        bytes[0]=(byte) CommonParams.SET_DEVICEID_REQ;
+        bytes[1]=1;
+        for (int i=2;i<18;i++) {
+            bytes[i]=deviceId.getBytes()[i-2];
+        }
+        addCommand(bleFramework, (byte) CommonParams.SET_MAGIC_REQ, bytes);
+    }
+
     public static void enterOta(BLEFramework bleFramework) {
         byte[] bytes=new byte[1];
         bytes[0]=(byte) 0x90;

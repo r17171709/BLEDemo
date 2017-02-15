@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'realm-android'
 
 android {
     compileSdkVersion 25
@@ -28,7 +29,7 @@ dependencies {
     compile 'com.android.support:support-v13:25.1.1'
     compile 'com.android.support:recyclerview-v7:25.1.1'
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta4'
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-beta5'
     // butterknife
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
     // eventbus

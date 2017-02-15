@@ -11,6 +11,7 @@ buildscript {
         // in the individual module build.gradle files
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
         classpath 'com.jakewharton:butterknife-gradle-plugin:8.5.1'
+        classpath "io.realm:realm-gradle-plugin:2.2.1"
     }
 }
 

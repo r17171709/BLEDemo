@@ -18,7 +18,12 @@ public class CommonParams {
     public static final int SET_MAGIC_REQ=0xa9;
     public static final int SET_MAGIC_RESP=0xaa;
     public static final int GET_DEVICE_CURRENT_REQ=0x9c;
+    public static final int SET_DEVICEID_REQ=0x9a;
+    public static final int SET_DEVICEID_RESP=0x9b;
 
     public static final int SCANDEVICE=1001;
     public static final int QRCODESCAN=1002;
+
+    public static final String READFILE="test_input.xls";
+    public static final String WRITEFILE="test.xls";
 }

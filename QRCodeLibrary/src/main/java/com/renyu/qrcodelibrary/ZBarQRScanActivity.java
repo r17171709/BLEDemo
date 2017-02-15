@@ -27,7 +27,7 @@ public class ZBarQRScanActivity extends AppCompatActivity {
         setContentView(R.layout.activity_zbarqrscan);
         ButterKnife.bind(this);
 
-        zbar_scan_view.changeToScanBarcodeStyle();
+//        zbar_scan_view.changeToScanBarcodeStyle();
         zbar_scan_view.setDelegate(new QRCodeView.Delegate() {
             @Override
             public void onScanQRCodeSuccess(String result) {
