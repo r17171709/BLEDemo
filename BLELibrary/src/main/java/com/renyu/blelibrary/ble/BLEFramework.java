@@ -239,7 +239,7 @@ public class BLEFramework {
         };
     }
 
-    private void disConnect() {
+    public void disConnect() {
         mBluetoothDeviceAddress = null;
         if (gatt!=null)
         gatt.disconnect();

@@ -21,7 +21,6 @@ import jxl.write.Label;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
-import jxl.write.biff.RowsExceededException;
 
 /**
  * Created by renyu on 2017/2/9.
@@ -29,7 +28,8 @@ import jxl.write.biff.RowsExceededException;
 
 public class ExcelUtils {
 
-    public static void writeExcel(AddRequestBean bean) {
+    public static boolean writeExcel(AddRequestBean bean) {
+        boolean isSave=false;
         File file=new File(Environment.getExternalStorageDirectory().getPath()+File.separator+CommonParams.WRITEFILE);
         int rowNumbers=getRowNumbers();
         if (rowNumbers==0) {
@@ -69,15 +69,9 @@ public class ExcelUtils {
             writableSheet.addCell(label2);
             writableSheet.addCell(label3);
             workbook.write();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (RowsExceededException e) {
-            e.printStackTrace();
-        } catch (WriteException e) {
-            e.printStackTrace();
-        } catch (BiffException e) {
+            isSave=true;
+        } catch (Exception e) {
+            isSave=false;
             e.printStackTrace();
         } finally {
             if (workbook!=null) {
@@ -90,6 +84,7 @@ public class ExcelUtils {
                 }
             }
         }
+        return isSave;
     }
 
     public static ArrayList<AddRequestBean> readExcel() {

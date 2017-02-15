@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
     String scanTarget;
 
-    Handler handler=new Handler() {
+    Handler handlerConnState=new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -71,12 +71,30 @@ public class MainActivity extends AppCompatActivity {
             else if (msg.what==BLEFramework.STATE_DISCONNECTED) {
                 if (progressDialog!=null) {
                     progressDialog.dismiss();
-                    Toast.makeText(MainActivity.this, "连接失败", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "连接断开", Toast.LENGTH_SHORT).show();
                 }
                 ble_state.setText("BLE状态：连接断开");
             }
             else if (msg.what== BLEFramework.STATE_SCANNED) {
                 EventBus.getDefault().post(""+BLEFramework.STATE_SCANNED);
+            }
+        }
+    };
+
+    Handler handlerCallbackValue=new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            if (msg.what==com.renyu.bledemo.params.CommonParams.ERROR_RESP) {
+                Toast.makeText(MainActivity.this, "指令执行出错", Toast.LENGTH_SHORT).show();
+            }
+            else if (msg.what==com.renyu.bledemo.params.CommonParams.SET_DEVICEID_RESP) {
+                if (msg.arg1==1) {
+                    Toast.makeText(MainActivity.this, "deviceId写入成功", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(MainActivity.this, "deviceId写入失败", Toast.LENGTH_SHORT).show();
+                }
             }
         }
     };
@@ -113,27 +131,32 @@ public class MainActivity extends AppCompatActivity {
             public void getCurrentState(int currentState) {
                 Message message=new Message();
                 message.what=currentState;
-                handler.sendMessage(message);
+                handlerConnState.sendMessage(message);
             }
         });
         bleFramework.setBleResponseListener(new BLEResponseListener() {
             @Override
             public void getResponseValues(byte[] value) {
-                Log.d("BLEService", "收到指令"+value[0]+" "+value[1]+" "+value[2]);
-                int result=(int) value[2]&0xff;
+                int result=value[2]&0xff;
+                Message message=new Message();
                 if (result!=com.renyu.bledemo.params.CommonParams.ERROR_RESP) {
                     byte[] response=DataUtils.decodeResult(value);
+                    message.what=response[0]&0xff;
                     if ((response[0]&0xff) == com.renyu.bledemo.params.CommonParams.SET_DEVICEID_RESP) {
                         if ((int) response[2]==1) {
                             ACache.get(MainActivity.this).put("ble_check", "Pass");
+                            message.arg1=1;
                         }
                         else {
                             ACache.get(MainActivity.this).put("ble_check", "Fail");
+                            message.arg1=-1;
                         }
                     }
+                    handlerCallbackValue.sendMessage(message);
                 }
                 else {
                     Log.d("MainActivity", "指令出错");
+                    handlerCallbackValue.sendEmptyMessage(com.renyu.bledemo.params.CommonParams.ERROR_RESP);
                 }
             }
         });
@@ -214,7 +237,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.button_start_search:
-                openBlueTooth(null);
+//                openBlueTooth(null);
                 break;
             case R.id.button_save_to_excel:
                 if (ACache.get(MainActivity.this).getAsString("sn")==null ||
@@ -229,7 +252,16 @@ public class MainActivity extends AppCompatActivity {
                     bean.setTestResult(ACache.get(MainActivity.this).getAsString("ble_check"));
                     SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     bean.setTestDate(dateFormat.format(new Date()));
-                    ExcelUtils.writeExcel(bean);
+                    if (ExcelUtils.writeExcel(bean)) {
+                        Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
+                        ACache.get(MainActivity.this).clear();
+                        bleFramework.disConnect();
+                        edit_machineid.setText("");
+                        search_deviceid_result.setText("查询结果：暂无");
+                    }
+                    else {
+                        Toast.makeText(this, "保存失败", Toast.LENGTH_SHORT).show();
+                    }
                 }
                 break;
             case R.id.read_from_excel:
@@ -289,5 +321,11 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ACache.get(MainActivity.this).clear();
     }
 }

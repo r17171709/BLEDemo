@@ -65,7 +65,7 @@
         app:layout_constraintLeft_toLeftOf="@+id/textView2" />
 
     <TextView
-        android:text="1. 导入excel数据\n文件请保存在在系统根目录下，文件名为test_input.xls，文件格式请参考范例"
+        android:text="1. 导入excel数据\n文件请保存在系统根目录下，文件名为test_input.xls，文件格式请参考范例"
         android:layout_width="352dp"
         android:layout_height="52dp"
         android:id="@+id/textView"
@@ -124,16 +124,16 @@
         app:layout_constraintLeft_toLeftOf="@+id/ble_state" />
 
     <TextView
-        android:text="5. 保存上传"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:text="5. 保存上传\n文件在系统根目录下，文件名为test.xls，文件格式请参考范例"
+        android:layout_width="352dp"
+        android:layout_height="51dp"
         android:id="@+id/textView6"
         android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@+id/button_setdeviceid"
         app:layout_constraintLeft_toLeftOf="@+id/button_setdeviceid" />
 
     <TextView
-        android:text="BLE状态：暂未连接"
+        android:text="BLE状态：连接断开"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/ble_state"
