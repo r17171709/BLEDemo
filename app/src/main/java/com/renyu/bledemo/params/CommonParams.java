@@ -12,6 +12,7 @@ public class CommonParams {
     public static final UUID UUID_Characteristic=UUID.fromString("0000cdd2-0000-1000-8000-00805f9b34fb");
     public static final UUID UUID_DESCRIPTOR=UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
 
+    public static final int ERROR_RSSI=0x00;
     public static final int ERROR_RESP=0xf1;
     public static final int SET_SN_REQ=0xa7;
     public static final int SET_SN_RESP=0xa8;
@@ -24,6 +25,13 @@ public class CommonParams {
     public static final int SCANDEVICE=1001;
     public static final int QRCODESCAN=1002;
 
-    public static final String READFILE="test_input.xls";
-    public static final String WRITEFILE="test.xls";
+    // 施工使用
+    public static final String READFILE_S="test_input.xls";
+    public static final String WRITEFILE_S="test.xls";
+    // 半制测试生成二维码
+    public static final String BARCODEFILE="code.jpg";
+    // 半制测试使用
+    public static final String WRITEFILE_B="testb.xls";
+
+    public static final int RSSIWRONG=-80;
 }

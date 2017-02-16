@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:text="1. 点击扫描，选择设备进行连接"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView3"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="16dp"
+        app:layout_constraintLeft_toLeftOf="parent" />
+
+    <Button
+        android:text="点击扫描"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/b_button_scanall"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/textView3"
+        app:layout_constraintLeft_toLeftOf="@+id/textView3" />
+
+    <TextView
+        android:text="BLE状态：连接断开"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/b_ble_state"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/b_ble_rssi"
+        app:layout_constraintLeft_toLeftOf="@+id/b_ble_rssi" />
+
+    <TextView
+        android:text="rssi：暂无"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/b_ble_rssi"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/b_button_scanall"
+        app:layout_constraintLeft_toLeftOf="@+id/b_button_scanall" />
+
+    <TextView
+        android:text="2. 写入sn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView9"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/b_ble_state"
+        app:layout_constraintLeft_toLeftOf="@+id/b_ble_state" />
+
+    <Button
+        android:text="点击写入"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/b_button_sn"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/textView9"
+        app:layout_constraintLeft_toLeftOf="@+id/textView9" />
+
+    <TextView
+        android:text="3. 生成二维码，上传"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView10"
+        app:layout_constraintLeft_toLeftOf="@+id/b_button_sn"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/b_button_sn" />
+
+    <Button
+        android:text="上传"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/b_button_upload"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@+id/textView10"
+        app:layout_constraintLeft_toLeftOf="@+id/textView10" />
+</android.support.constraint.ConstraintLayout>

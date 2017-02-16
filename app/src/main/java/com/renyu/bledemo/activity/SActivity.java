@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -28,11 +29,11 @@ import com.renyu.blelibrary.impl.BLEStateChangeListener;
 import com.renyu.blelibrary.params.CommonParams;
 import com.renyu.blelibrary.utils.ACache;
 import com.renyu.blelibrary.utils.BLEUtils;
-import com.renyu.iitebletest.jniLibs.JNIUtils;
 import com.renyu.qrcodelibrary.ZBarQRScanActivity;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,10 +42,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity {
+public class SActivity extends AppCompatActivity {
 
     BLEFramework bleFramework;
-    JNIUtils jniUtils;
 
     @BindView(R.id.ble_state)
     TextView ble_state;
@@ -64,16 +64,19 @@ public class MainActivity extends AppCompatActivity {
                     || msg.what==BLEFramework.STATE_SERVICES_OTA_DISCOVERED) {
                 if (progressDialog!=null) {
                     progressDialog.dismiss();
-                    Toast.makeText(MainActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
                 }
                 ble_state.setText("BLE状态：连接成功");
             }
             else if (msg.what==BLEFramework.STATE_DISCONNECTED) {
                 if (progressDialog!=null) {
                     progressDialog.dismiss();
-                    Toast.makeText(MainActivity.this, "连接断开", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SActivity.this, "连接断开", Toast.LENGTH_SHORT).show();
                 }
+                ACache.get(SActivity.this).clear();
                 ble_state.setText("BLE状态：连接断开");
+                edit_machineid.setText("");
+                search_deviceid_result.setText("查询结果：暂无");
             }
             else if (msg.what== BLEFramework.STATE_SCANNED) {
                 EventBus.getDefault().post(""+BLEFramework.STATE_SCANNED);
@@ -86,14 +89,14 @@ public class MainActivity extends AppCompatActivity {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.what==com.renyu.bledemo.params.CommonParams.ERROR_RESP) {
-                Toast.makeText(MainActivity.this, "指令执行出错", Toast.LENGTH_SHORT).show();
+                Toast.makeText(SActivity.this, "指令执行出错", Toast.LENGTH_SHORT).show();
             }
             else if (msg.what==com.renyu.bledemo.params.CommonParams.SET_DEVICEID_RESP) {
                 if (msg.arg1==1) {
-                    Toast.makeText(MainActivity.this, "deviceId写入成功", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SActivity.this, "deviceId写入成功", Toast.LENGTH_SHORT).show();
                 }
                 else {
-                    Toast.makeText(MainActivity.this, "deviceId写入失败", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SActivity.this, "deviceId写入失败", Toast.LENGTH_SHORT).show();
                 }
             }
         }
@@ -102,10 +105,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_s);
         ButterKnife.bind(this);
-
-        jniUtils=new JNIUtils();
 
         bleFramework=BLEFramework.getBleFrameworkInstance(this,
                 com.renyu.bledemo.params.CommonParams.UUID_SERVICE,
@@ -115,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
         bleFramework.setBleConnectListener(new BLEConnectListener() {
             @Override
             public void getAllScanDevice(ArrayList<BLEDevice> devices) {
-                Log.d("MainActivity", "devices.size():" + devices.size());
+                Log.d("SActivity", "devices.size():" + devices.size());
                 for (BLEDevice device : devices) {
                     byte[] scanRecord=device.getScanRecord();
                     int a=(int) scanRecord[5]&0xff;
@@ -144,18 +145,18 @@ public class MainActivity extends AppCompatActivity {
                     message.what=response[0]&0xff;
                     if ((response[0]&0xff) == com.renyu.bledemo.params.CommonParams.SET_DEVICEID_RESP) {
                         if ((int) response[2]==1) {
-                            ACache.get(MainActivity.this).put("ble_check", "Pass");
+                            ACache.get(SActivity.this).put("ble_check", "Pass");
                             message.arg1=1;
                         }
                         else {
-                            ACache.get(MainActivity.this).put("ble_check", "Fail");
+                            ACache.get(SActivity.this).put("ble_check", "Fail");
                             message.arg1=-1;
                         }
                     }
                     handlerCallbackValue.sendMessage(message);
                 }
                 else {
-                    Log.d("MainActivity", "指令出错");
+                    Log.d("SActivity", "指令出错");
                     handlerCallbackValue.sendEmptyMessage(com.renyu.bledemo.params.CommonParams.ERROR_RESP);
                 }
             }
@@ -183,13 +184,13 @@ public class MainActivity extends AppCompatActivity {
     private void getDevices(String scanTarget) {
         bleFramework.startScan();
 
-        Intent intent=new Intent(MainActivity.this, DeviceListActivity.class);
+        Intent intent=new Intent(SActivity.this, DeviceListActivity.class);
         if (scanTarget!=null) {
             intent.putExtra("scanTarget", scanTarget);
         }
         startActivityForResult(intent, com.renyu.bledemo.params.CommonParams.SCANDEVICE);
 
-        MainActivity.this.scanTarget=null;
+        SActivity.this.scanTarget=null;
     }
 
     @Override
@@ -201,11 +202,9 @@ public class MainActivity extends AppCompatActivity {
         else if (requestCode==com.renyu.bledemo.params.CommonParams.SCANDEVICE && resultCode==RESULT_OK) {
             BluetoothDevice bleDevice=data.getParcelableExtra("device");
             // 存储SN
-            ACache.get(MainActivity.this).put("sn", data.getStringExtra("sn"));
-            // rssi
-            ACache.get(MainActivity.this).put("rssi", ""+data.getIntExtra("rssi", 0));
+            ACache.get(SActivity.this).put("sn", data.getStringExtra("sn"));
             bleFramework.startConn(bleDevice);
-            progressDialog= ProgressDialog.show(MainActivity.this, "提示", "正在连接");
+            progressDialog= ProgressDialog.show(SActivity.this, "提示", "正在连接");
         }
         else if (requestCode==com.renyu.bledemo.params.CommonParams.SCANDEVICE && resultCode==RESULT_CANCELED) {
             bleFramework.cancelScan();
@@ -223,14 +222,14 @@ public class MainActivity extends AppCompatActivity {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_setdeviceid:
-//                DataUtils.setSNReq(bleFramework, ACache.get(MainActivity.this).getAsString("sn"));
+//                DataUtils.setSNReq(bleFramework, ACache.get(SActivity.this).getAsString("sn"));
 //                DataUtils.setMagicReq(bleFramework, (byte) 0x66);
 //                DataUtils.readMagicReq(bleFramework);
 //                DataUtils.readSNReq(bleFramework);
 //                DataUtils.enterOta(bleFramework);
 //                bleFramework.startOTA();
                 if (!ble_state.getText().toString().equals("BLE状态：连接断开")) {
-                    DataUtils.setDeviceId(bleFramework, ACache.get(MainActivity.this).getAsString("deviceId"));
+                    DataUtils.setDeviceId(bleFramework, ACache.get(SActivity.this).getAsString("deviceId"));
                 }
                 else {
                     Toast.makeText(this, "BLE连接断开，暂时无法发送", Toast.LENGTH_SHORT).show();
@@ -240,21 +239,21 @@ public class MainActivity extends AppCompatActivity {
 //                openBlueTooth(null);
                 break;
             case R.id.button_save_to_excel:
-                if (ACache.get(MainActivity.this).getAsString("sn")==null ||
-                        ACache.get(MainActivity.this).getAsString("deviceId")==null ||
-                        ACache.get(MainActivity.this).getAsString("ble_check")==null) {
+                if (ACache.get(SActivity.this).getAsString("sn")==null ||
+                        ACache.get(SActivity.this).getAsString("deviceId")==null ||
+                        ACache.get(SActivity.this).getAsString("ble_check")==null) {
                     Toast.makeText(this, "暂无sn与deviceId信息，不能保存", Toast.LENGTH_SHORT).show();
                 }
                 else {
                     AddRequestBean bean=new AddRequestBean();
-                    bean.setSn(ACache.get(MainActivity.this).getAsString("sn"));
-                    bean.setDeviceID(ACache.get(MainActivity.this).getAsString("deviceId"));
-                    bean.setTestResult(ACache.get(MainActivity.this).getAsString("ble_check"));
+                    bean.setSn(ACache.get(SActivity.this).getAsString("sn"));
+                    bean.setDeviceID(ACache.get(SActivity.this).getAsString("deviceId"));
+                    bean.setTestResult(ACache.get(SActivity.this).getAsString("ble_check"));
                     SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     bean.setTestDate(dateFormat.format(new Date()));
-                    if (ExcelUtils.writeExcel(bean)) {
+                    if (ExcelUtils.writeExcel(Environment.getExternalStorageDirectory().getPath()+ File.separator+ com.renyu.bledemo.params.CommonParams.WRITEFILE_S, bean)) {
                         Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
-                        ACache.get(MainActivity.this).clear();
+                        ACache.get(SActivity.this).clear();
                         bleFramework.disConnect();
                         edit_machineid.setText("");
                         search_deviceid_result.setText("查询结果：暂无");
@@ -265,20 +264,20 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.read_from_excel:
-                progressDialog= ProgressDialog.show(MainActivity.this, "提示", "正在导入");
-                ArrayList<AddRequestBean> beans=ExcelUtils.readExcel();
+                progressDialog= ProgressDialog.show(SActivity.this, "提示", "正在导入");
+                ArrayList<AddRequestBean> beans=ExcelUtils.readExcel(Environment.getExternalStorageDirectory().getPath()+ File.separator+ com.renyu.bledemo.params.CommonParams.READFILE_S);
                 if (beans.size()==0) {
                     if (progressDialog!=null) {
                         progressDialog.dismiss();
                         progressDialog=null;
                     }
-                    Toast.makeText(MainActivity.this, "暂无数据", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SActivity.this, "暂无数据", Toast.LENGTH_SHORT).show();
                 }
                 else {
                     ReamlUtils.write(this, beans, new ReamlUtils.OnWriteResultListener() {
                         @Override
                         public void onSuccess() {
-                            Toast.makeText(MainActivity.this, "导入成功", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SActivity.this, "导入成功", Toast.LENGTH_SHORT).show();
                             if (progressDialog!=null) {
                                 progressDialog.dismiss();
                                 progressDialog=null;
@@ -287,7 +286,7 @@ public class MainActivity extends AppCompatActivity {
 
                         @Override
                         public void onError(Throwable error) {
-                            Toast.makeText(MainActivity.this, "导入失败", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SActivity.this, "导入失败", Toast.LENGTH_SHORT).show();
                             if (progressDialog!=null) {
                                 progressDialog.dismiss();
                                 progressDialog=null;
@@ -297,16 +296,16 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.button_qrcode_scan:
-                if (ACache.get(MainActivity.this).getAsString("deviceId") == null) {
+                if (ACache.get(SActivity.this).getAsString("deviceId") == null) {
                     Toast.makeText(this, "请确保deviceId存在", Toast.LENGTH_SHORT).show();
                 }
                 else {
-                    startActivityForResult(new Intent(MainActivity.this, ZBarQRScanActivity.class), com.renyu.bledemo.params.CommonParams.QRCODESCAN);
+                    startActivityForResult(new Intent(SActivity.this, ZBarQRScanActivity.class), com.renyu.bledemo.params.CommonParams.QRCODESCAN);
                 }
                 break;
             case R.id.search_deviceid:
                 if (TextUtils.isEmpty(edit_machineid.getText().toString())) {
-                    Log.d("MainActivity", "请输入机器ID");
+                    Log.d("SActivity", "请输入机器ID");
                 }
                 else {
                     ArrayList<AddRequestBean> temps=ReamlUtils.findOne(this, edit_machineid.getText().toString());
@@ -316,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
                     else {
                         search_deviceid_result.setText("查询结果："+temps.get(0).getDeviceID());
                         // 存储deviceId
-                        ACache.get(MainActivity.this).put("deviceId", temps.get(0).getDeviceID());
+                        ACache.get(SActivity.this).put("deviceId", temps.get(0).getDeviceID());
                     }
                 }
                 break;
@@ -326,6 +325,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        ACache.get(MainActivity.this).clear();
+        ACache.get(SActivity.this).clear();
+        bleFramework.disConnect();
     }
 }

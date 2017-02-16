@@ -1,7 +1,5 @@
 package com.renyu.bledemo.utils;
 
-import android.os.Environment;
-
 import com.renyu.bledemo.params.AddRequestBean;
 import com.renyu.bledemo.params.CommonParams;
 
@@ -28,10 +26,10 @@ import jxl.write.WriteException;
 
 public class ExcelUtils {
 
-    public static boolean writeExcel(AddRequestBean bean) {
+    public static boolean writeExcel(String filePath, AddRequestBean bean) {
         boolean isSave=false;
-        File file=new File(Environment.getExternalStorageDirectory().getPath()+File.separator+CommonParams.WRITEFILE);
-        int rowNumbers=getRowNumbers();
+        File file=new File(filePath);
+        int rowNumbers=getRowNumbers(filePath);
         if (rowNumbers==0) {
             if (file.exists()) {
                 file.delete();
@@ -49,7 +47,15 @@ public class ExcelUtils {
                 OutputStream os=new FileOutputStream(file);
                 workbook= Workbook.createWorkbook(os);
                 writableSheet=workbook.createSheet("测试结果", 0);
-                String[] title={"SN", "deviceId", "测试结果", "测试时间"};
+                String[] title;
+                if (filePath.equals(CommonParams.WRITEFILE_B)) {
+                    String[] temp={"SN", "sn", "测试结果", "测试时间"};
+                    title=temp;
+                }
+                else {
+                    String[] temp={"SN", "deviceId", "测试结果", "测试时间"};
+                    title=temp;
+                }
                 for (int i = 0; i < title.length; i++) {
                     Label label=new Label(i, 0, title[i]);
                     writableSheet.addCell(label);
@@ -87,8 +93,7 @@ public class ExcelUtils {
         return isSave;
     }
 
-    public static ArrayList<AddRequestBean> readExcel() {
-        String filePath=Environment.getExternalStorageDirectory().getPath() + File.separator + CommonParams.READFILE;
+    public static ArrayList<AddRequestBean> readExcel(String filePath) {
         ArrayList<AddRequestBean> beans=new ArrayList<>();
         File file=new File(filePath);
         if (!file.exists()) {
@@ -120,8 +125,7 @@ public class ExcelUtils {
         return beans;
     }
 
-    private static int getRowNumbers() {
-        String filePath=Environment.getExternalStorageDirectory().getPath() + File.separator + CommonParams.WRITEFILE;
+    private static int getRowNumbers(String filePath) {
         File file=new File(filePath);
         if (!file.exists()) {
             return 0;

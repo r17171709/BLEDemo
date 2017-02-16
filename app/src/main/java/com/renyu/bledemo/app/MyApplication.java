@@ -17,6 +17,8 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        com.blankj.utilcode.utils.Utils.init(this);
+
         Realm.init(this);
         RealmConfiguration configuration=new RealmConfiguration.Builder().name("devicesinfo").schemaVersion(1).build();
         realm=Realm.getInstance(configuration);

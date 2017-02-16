@@ -45,7 +45,7 @@ public class UploadUtils {
 
                     @Override
                     public void onNext(TableBean bean) {
-                        Log.d("MainActivity", "OK");
+                        Log.d("SActivity", "OK");
                     }
                 });
     }
@@ -103,7 +103,7 @@ public class UploadUtils {
 
                     @Override
                     public void onNext(AddResultBean addResultBean) {
-                        Log.d("MainActivity", "OK");
+                        Log.d("SActivity", "OK");
                     }
                 });
     }
