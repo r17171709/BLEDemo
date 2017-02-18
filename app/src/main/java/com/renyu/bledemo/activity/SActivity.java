@@ -190,7 +190,7 @@ public class SActivity extends AppCompatActivity {
         }
         startActivityForResult(intent, com.renyu.bledemo.params.CommonParams.SCANDEVICE);
 
-        SActivity.this.scanTarget=null;
+        this.scanTarget=null;
     }
 
     @Override
@@ -251,7 +251,7 @@ public class SActivity extends AppCompatActivity {
                     bean.setTestResult(ACache.get(SActivity.this).getAsString("ble_check"));
                     SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     bean.setTestDate(dateFormat.format(new Date()));
-                    if (ExcelUtils.writeExcel(Environment.getExternalStorageDirectory().getPath()+ File.separator+ com.renyu.bledemo.params.CommonParams.WRITEFILE_S, bean)) {
+                    if (ExcelUtils.writeSExcel(Environment.getExternalStorageDirectory().getPath()+ File.separator+ com.renyu.bledemo.params.CommonParams.WRITEFILE_S, bean)) {
                         Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
                         ACache.get(SActivity.this).clear();
                         bleFramework.disConnect();

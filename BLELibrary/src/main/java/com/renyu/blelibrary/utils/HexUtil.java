@@ -183,6 +183,10 @@ public class HexUtil {
         return b;
     }
 
+    public static int byte2ToInt(byte[] bytes) {
+        return bytes[1] & 0xFF | (bytes[0] & 0xFF) << 8;
+    }
+
     /**
      * 将两个ASCII字符合成一个字节；
      * 如："EF"--> 0xEF

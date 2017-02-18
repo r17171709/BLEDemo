@@ -117,7 +117,10 @@ public class DataUtils {
     }
 
     public static void getDeviceCurrentReq(BLEFramework bleFramework) {
-        addCommand(bleFramework, (byte) CommonParams.GET_DEVICE_CURRENT_REQ, new byte[]{0x00});
+        byte[] bytes=new byte[2];
+        bytes[0]= (byte) CommonParams.GET_DEVICE_CURRENT_REQ;
+        bytes[1]=0x00;
+        addCommand(bleFramework, (byte) CommonParams.GET_DEVICE_CURRENT_REQ, bytes);
     }
 
     public static void setMagicReq(BLEFramework bleFramework, byte magic) {

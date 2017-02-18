@@ -19,6 +19,7 @@ public class CommonParams {
     public static final int SET_MAGIC_REQ=0xa9;
     public static final int SET_MAGIC_RESP=0xaa;
     public static final int GET_DEVICE_CURRENT_REQ=0x9c;
+    public static final int GET_DEVICE_CURRENT_RESP=0x9d;
     public static final int SET_DEVICEID_REQ=0x9a;
     public static final int SET_DEVICEID_RESP=0x9b;
 
@@ -31,7 +32,9 @@ public class CommonParams {
     // 半制测试生成二维码
     public static final String BARCODEFILE="code.jpg";
     // 半制测试使用
-    public static final String WRITEFILE_B="testb.xls";
+    public static final String WRITEFILE_B="testb.xQls";
+    // 全制测试使用
+    public static final String WRITEFILE_Q="testq.xls";
 
-    public static final int RSSIWRONG=-80;
+    public static final int RSSIWRONG=-40;
 }

@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -13,12 +14,14 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.blankj.utilcode.utils.ImageUtils;
 import com.renyu.bledemo.R;
-import com.renyu.bledemo.params.AddRequestBean;
+import com.renyu.bledemo.params.AddBRequestBean;
 import com.renyu.bledemo.utils.DataUtils;
 import com.renyu.bledemo.utils.ExcelUtils;
 import com.renyu.blelibrary.bean.BLEDevice;
@@ -60,7 +63,16 @@ public class BActivity extends AppCompatActivity {
     TextView b_ble_state;
     @BindView(R.id.b_ble_rssi)
     TextView b_ble_rssi;
-
+    @BindView(R.id.cb_led)
+    CheckBox cb_led;
+    @BindView(R.id.cb_buzzer)
+    CheckBox cb_buzzer;
+    @BindView(R.id.cb_rfid)
+    CheckBox cb_rfid;
+    @BindView(R.id.cb_current_sensor)
+    CheckBox cb_current_sensor;
+    @BindView(R.id.iv_qrcode)
+    ImageView iv_qrcode;
     ProgressDialog progressDialog;
 
     Handler handlerConnState=new Handler() {
@@ -81,8 +93,12 @@ public class BActivity extends AppCompatActivity {
                     Toast.makeText(BActivity.this, "连接断开", Toast.LENGTH_SHORT).show();
                 }
                 ACache.get(BActivity.this).clear();
-                b_ble_rssi.setText("rssi：暂无");
+                b_ble_rssi.setText("rssi(正常范围大于-40)：暂无");
                 b_ble_state.setText("BLE状态：连接断开");
+                cb_buzzer.setChecked(false);
+                cb_current_sensor.setChecked(false);
+                cb_led.setChecked(false);
+                cb_rfid.setChecked(false);
             }
             else if (msg.what== BLEFramework.STATE_SCANNED) {
                 EventBus.getDefault().post(""+BLEFramework.STATE_SCANNED);
@@ -98,8 +114,8 @@ public class BActivity extends AppCompatActivity {
                 Toast.makeText(BActivity.this, "指令执行出错", Toast.LENGTH_SHORT).show();
             }
             else if (msg.what== com.renyu.bledemo.params.CommonParams.ERROR_RSSI) {
-                Toast.makeText(BActivity.this, "rssi无效", Toast.LENGTH_SHORT).show();
-                save(1);
+                Toast.makeText(BActivity.this, "rssi不符合测试判断依据", Toast.LENGTH_SHORT).show();
+                uploadData(1);
             }
             else if (msg.what==com.renyu.bledemo.params.CommonParams.SET_SN_RESP) {
                 if (msg.arg1==1) {
@@ -107,7 +123,7 @@ public class BActivity extends AppCompatActivity {
                 }
                 else {
                     Toast.makeText(BActivity.this, "sn写入失败", Toast.LENGTH_SHORT).show();
-                    save(2);
+                    uploadData(2);
                 }
             }
         }
@@ -209,7 +225,7 @@ public class BActivity extends AppCompatActivity {
             ACache.get(BActivity.this).put("sn", data.getStringExtra("sn"));
             // rssi
             ACache.get(BActivity.this).put("rssi", ""+data.getIntExtra("rssi", 0));
-            b_ble_rssi.setText("rssi："+data.getIntExtra("rssi", 0));
+            b_ble_rssi.setText("rssi(正常范围大于-40)："+data.getIntExtra("rssi", 0));
             // rssi满足一定条件才能继续
             if (data.getIntExtra("rssi", 0) < com.renyu.bledemo.params.CommonParams.RSSIWRONG) {
                 Message m=new Message();
@@ -241,12 +257,21 @@ public class BActivity extends AppCompatActivity {
                 }
                 break;
             case R.id.b_button_upload:
-                if (ACache.get(BActivity.this).getAsString("sn")==null ||
-                        ACache.get(BActivity.this).getAsString("rssi")==null) {
-                    Toast.makeText(this, "暂无sn与rssi信息，不能保存", Toast.LENGTH_SHORT).show();
+                if (ACache.get(BActivity.this).getAsString("sn")==null) {
+                    Toast.makeText(this, "暂无sn信息，不能保存", Toast.LENGTH_SHORT).show();
                 }
                 else {
-                    save(-1);
+                    if (b_ble_state.getText().toString().equals("BLE状态：连接断开")) {
+                        if (b_ble_rssi.getText().toString().equals("rssi(正常范围大于-40)：暂无")) {
+                            uploadData(3);
+                        }
+                        else {
+                            uploadData(1);
+                        }
+                    }
+                    else {
+                        saveImage();
+                    }
                 }
                 break;
         }
@@ -259,74 +284,103 @@ public class BActivity extends AppCompatActivity {
         bleFramework.disConnect();
     }
 
-    public void save(int errorCode) {
-        if (errorCode==-1) {
-            Observable.create(new Observable.OnSubscribe<Object>() {
-                @Override
-                public void call(Subscriber<? super Object> subscriber) {
-                    File file=new File(Environment.getExternalStorageDirectory().getPath()+File.separator
-                            + com.renyu.bledemo.params.CommonParams.BARCODEFILE);
-                    if (file.exists()) {
-                        file.delete();
-                    }
-                    try {
-                        file.createNewFile();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    boolean isOK=ImageUtils.save(QRCodeEncoder.syncEncodeQRCode(ACache.get(BActivity.this).getAsString("sn"), 300),
-                            file,
-                            Bitmap.CompressFormat.JPEG);
-                    if (isOK) {
-                        subscriber.onNext(file.getPath());
-                    }
-                    else {
-                        subscriber.onNext("");
-                    }
+    public void saveImage() {
+        Observable.create(new Observable.OnSubscribe<Object>() {
+            @Override
+            public void call(Subscriber<? super Object> subscriber) {
+                File file=new File(Environment.getExternalStorageDirectory().getPath()+File.separator
+                        + com.renyu.bledemo.params.CommonParams.BARCODEFILE);
+                if (file.exists()) {
+                    file.delete();
                 }
-            }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Object>() {
-                @Override
-                public void call(Object o) {
-                    if (o.toString().equals("")) {
-                        Toast.makeText(BActivity.this, "生成图片失败", Toast.LENGTH_SHORT).show();
-                    }
-                    else {
-                        Toast.makeText(BActivity.this, "生成图片成功", Toast.LENGTH_SHORT).show();
-                    }
-                    AddRequestBean bean=new AddRequestBean();
-                    bean.setSn(ACache.get(BActivity.this).getAsString("sn"));
-                    bean.setDeviceID(ACache.get(BActivity.this).getAsString("rssi"));
-                    bean.setTestResult("Pass");
-                    SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    bean.setTestDate(dateFormat.format(new Date()));
-                    if (ExcelUtils.writeExcel(Environment.getExternalStorageDirectory().getPath()+ File.separator+ com.renyu.bledemo.params.CommonParams.WRITEFILE_B, bean)) {
-                        Toast.makeText(BActivity.this, "保存成功", Toast.LENGTH_SHORT).show();
-                        ACache.get(BActivity.this).clear();
-                        bleFramework.disConnect();
-                        b_ble_rssi.setText("rssi：暂无");
-                    }
-                    else {
-                        Toast.makeText(BActivity.this, "保存失败", Toast.LENGTH_SHORT).show();
-                    }
+                try {
+                    file.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            });
+                boolean isOK=ImageUtils.save(QRCodeEncoder.syncEncodeQRCode(ACache.get(BActivity.this).getAsString("sn"), 300),
+                        file,
+                        Bitmap.CompressFormat.JPEG);
+                if (isOK) {
+                    subscriber.onNext(file.getPath());
+                }
+                else {
+                    subscriber.onNext("");
+                }
+            }
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<Object>() {
+            @Override
+            public void call(Object o) {
+                if (o.toString().equals("")) {
+                    Toast.makeText(BActivity.this, "生成图片失败", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    iv_qrcode.setImageBitmap(BitmapFactory.decodeFile(o.toString()));
+                    Toast.makeText(BActivity.this, "生成图片成功", Toast.LENGTH_SHORT).show();
+                }
+                uploadData(-1);
+            }
+        });
+    }
+
+    private void uploadData(int errorCode) {
+        AddBRequestBean bean=new AddBRequestBean();
+        bean.setSn(ACache.get(BActivity.this).getAsString("sn"));
+        bean.setRssi(ACache.get(BActivity.this).getAsString("rssi"));
+        if (errorCode==3) {
+            bean.setBuzzer("设备无法连接，无法获取该值");
+            bean.setCurrent_sensor("设备无法连接，无法获取该值");
+            bean.setLed("设备无法连接，无法获取该值");
+            bean.setRfid("设备无法连接，无法获取该值");
+            bean.setSn_state("设备无法连接，无法获取该值");
+            bean.setTestResult("Fail");
         }
-        else {
-            AddRequestBean bean=new AddRequestBean();
-            bean.setSn(ACache.get(BActivity.this).getAsString("sn"));
-            bean.setDeviceID(ACache.get(BActivity.this).getAsString("rssi"));
-            bean.setTestResult("fail");
-            SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            bean.setTestDate(dateFormat.format(new Date()));
-            if (ExcelUtils.writeExcel(Environment.getExternalStorageDirectory().getPath()+ File.separator+ com.renyu.bledemo.params.CommonParams.WRITEFILE_B, bean)) {
-                Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
-                ACache.get(BActivity.this).clear();
-                bleFramework.disConnect();
-                b_ble_rssi.setText("rssi：暂无");
+        else if (errorCode==2) {
+            bean.setBuzzer(cb_buzzer.isChecked()?"Pass":"Fail");
+            bean.setCurrent_sensor(cb_current_sensor.isChecked()?"Pass":"Fail");
+            bean.setLed(cb_led.isChecked()?"Pass":"Fail");
+            bean.setRfid(cb_rfid.isChecked()?"Pass":"Fail");
+            bean.setSn_state("SN无法写入");
+            bean.setTestResult("Fail");
+        }
+        else if (errorCode==1) {
+            bean.setBuzzer("rssi不符合测试判断依据，无法获取该值");
+            bean.setCurrent_sensor("rssi不符合测试判断依据，无法获取该值");
+            bean.setLed("rssi不符合测试判断依据，无法获取该值");
+            bean.setRfid("rssi不符合测试判断依据，无法获取该值");
+            bean.setSn_state("rssi不符合测试判断依据，无法获取该值");
+            bean.setTestResult("Fail");
+        }
+        else if (errorCode==-1) {
+            bean.setBuzzer(cb_buzzer.isChecked()?"Pass":"Fail");
+            bean.setCurrent_sensor(cb_current_sensor.isChecked()?"Pass":"Fail");
+            bean.setLed(cb_led.isChecked()?"Pass":"Fail");
+            bean.setRfid(cb_rfid.isChecked()?"Pass":"Fail");
+            bean.setSn_state("SN正常写入");
+            if (cb_buzzer.isChecked() &&
+                    cb_current_sensor.isChecked() &&
+                    cb_led.isChecked() &&
+                    cb_rfid.isChecked()) {
+                bean.setTestResult("Pass");
             }
             else {
-                Toast.makeText(this, "保存失败", Toast.LENGTH_SHORT).show();
+                bean.setTestResult("Fail");
             }
+        }
+        SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        bean.setTestDate(dateFormat.format(new Date()));
+        if (ExcelUtils.writeExcelB(Environment.getExternalStorageDirectory().getPath()+ File.separator+ com.renyu.bledemo.params.CommonParams.WRITEFILE_B, bean)) {
+            Toast.makeText(BActivity.this, "保存成功", Toast.LENGTH_SHORT).show();
+            ACache.get(BActivity.this).clear();
+            bleFramework.disConnect();
+            b_ble_rssi.setText("rssi(正常范围大于-40)：暂无");
+            cb_buzzer.setChecked(false);
+            cb_current_sensor.setChecked(false);
+            cb_led.setChecked(false);
+            cb_rfid.setChecked(false);
+        }
+        else {
+            Toast.makeText(BActivity.this, "保存失败", Toast.LENGTH_SHORT).show();
         }
     }
 }
