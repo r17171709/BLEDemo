@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
-import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
@@ -27,7 +26,6 @@ import com.renyu.blelibrary.utils.HexUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -86,6 +84,9 @@ public class BLEFramework {
     private BLEConnectListener bleConnectListener;
     private BLEStateChangeListener bleStateChangeListener;
     private BLEResponseListener bleResponseListener;
+
+    // OTA标记
+    public static boolean isOTA=false;
 
     public static BLEFramework getBleFrameworkInstance(Context context,
                                                        UUID UUID_SERVICE, UUID UUID_Characteristic, UUID UUID_DESCRIPTOR) {
@@ -428,7 +429,7 @@ public class BLEFramework {
 //                return true;
 //            }
 //        }
-        return false;
+        return isOTA;
     }
 
     /**

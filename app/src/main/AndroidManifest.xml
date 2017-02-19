@@ -22,6 +22,7 @@
         <activity android:name=".activity.QActivity" android:screenOrientation="portrait"></activity>
         <activity android:name=".activity.SActivity" android:screenOrientation="portrait"></activity>
         <activity android:name=".activity.DeviceListActivity" android:screenOrientation="portrait"></activity>
+        <activity android:name=".activity.OTAActivity" android:screenOrientation="portrait"></activity>
     </application>
 
 </manifest>

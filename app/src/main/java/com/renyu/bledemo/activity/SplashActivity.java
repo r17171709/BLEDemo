@@ -24,7 +24,7 @@ public class SplashActivity extends AppCompatActivity {
         ButterKnife.bind(this);
     }
 
-    @OnClick({R.id.button_b, R.id.button_q, R.id.button_s})
+    @OnClick({R.id.button_b, R.id.button_q, R.id.button_s, R.id.button_ota})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_b:
@@ -35,6 +35,9 @@ public class SplashActivity extends AppCompatActivity {
                 break;
             case R.id.button_s:
                 startActivity(new Intent(SplashActivity.this, SActivity.class));
+                break;
+            case R.id.button_ota:
+                startActivity(new Intent(SplashActivity.this, OTAActivity.class));
                 break;
         }
     }

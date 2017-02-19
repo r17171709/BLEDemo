@@ -19,8 +19,11 @@ import com.cypress.cysmart.CommonUtils.Constants;
 import com.cypress.cysmart.CommonUtils.GattAttributes;
 import com.cypress.cysmart.CommonUtils.Utils;
 import com.cypress.cysmart.DataModelClasses.OTAFlashRowModel;
+import com.renyu.blelibrary.bean.OTABean;
 import com.renyu.blelibrary.ble.BLEFramework;
 import com.renyu.blelibrary.params.CommonParams;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 
@@ -244,9 +247,19 @@ public class OTAService extends Service implements FileReadStatusUpdater {
                         Log.d("BLEService", "ota固件升级成功");
                         if (secondFileUpdatedNeeded()) {
                             Log.d("BLEService", "堆栈升级成功完成。应用程序升级悬而未决");
+
+                            // 发射进度
+                            OTABean otaBean=new OTABean();
+                            otaBean.setProcess(-1);
+                            EventBus.getDefault().post(otaBean);
                         }
                         else {
                             Log.d("BLEService", "ota固件升级成功");
+
+                            // 发射进度
+                            OTABean otaBean=new OTABean();
+                            otaBean.setProcess(101);
+                            EventBus.getDefault().post(otaBean);
                         }
                         CommonParams.mFileupgradeStarted = false;
                         if (BLEFramework.getBleFrameworkInstance().getCurrentGattInstance()!=null) {
@@ -258,6 +271,11 @@ public class OTAService extends Service implements FileReadStatusUpdater {
                         String errorMessage = extras.getString(Constants.EXTRA_ERROR_OTA);
                         Log.d("BLEService", errorMessage);
                         stopSelf();
+
+                        // 发射进度
+                        OTABean otaBean=new OTABean();
+                        otaBean.setProcess(-1);
+                        EventBus.getDefault().post(otaBean);
                     }
                 }
                 if (action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
@@ -423,7 +441,10 @@ public class OTAService extends Service implements FileReadStatusUpdater {
     private void showProgress(int fileStatus, float fileLineNos, float totalLines) {
         if (fileStatus == 1) {
             Log.i("BLEService", (int) fileLineNos+"  "+(int) totalLines+"  "+(int) ((fileLineNos / totalLines) * 100) + "%");
-            Log.d("BLEFramework", "" + (int) ((fileLineNos / totalLines) * 100));
+            // 发射进度
+            OTABean otaBean=new OTABean();
+            otaBean.setProcess((int) ((fileLineNos / totalLines) * 100));
+            EventBus.getDefault().post(otaBean);
         }
         if (fileStatus == 2) {
             Log.d("BLEService", "结束");

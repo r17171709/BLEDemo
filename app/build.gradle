@@ -32,8 +32,6 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.0-beta5'
     // butterknife
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
-    // eventbus
-    compile 'org.greenrobot:eventbus:3.0.0'
     // retrofit
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
