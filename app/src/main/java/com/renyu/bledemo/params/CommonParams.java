@@ -22,6 +22,8 @@ public class CommonParams {
     public static final int GET_DEVICE_CURRENT_RESP=0x9d;
     public static final int SET_DEVICEID_REQ=0x9a;
     public static final int SET_DEVICEID_RESP=0x9b;
+    public static final int SET_CURRENT_THRESHOLD_REQ=0x9e;
+    public static final int SET_CURRENT_THRESHOLD_RESP=0x9f;
 
     public static final int SCANDEVICE=1001;
     public static final int QRCODESCAN=1002;
@@ -36,5 +38,5 @@ public class CommonParams {
     // 全制测试使用
     public static final String WRITEFILE_Q="testq.xls";
 
-    public static final int RSSIWRONG=-80;
+    public static final int RSSIWRONG=-40;
 }

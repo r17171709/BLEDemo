@@ -178,7 +178,7 @@ public class ExcelUtils {
                 OutputStream os=new FileOutputStream(file);
                 workbook= Workbook.createWorkbook(os);
                 writableSheet=workbook.createSheet("施工测试结果", 0);
-                String[] title={"SN", "deviceId", "负载测试", "测试结果", "测试时间"};
+                String[] title={"SN", "deviceId", "读取阈值", "写阈值", "测试结果", "测试时间"};
                 for (int i = 0; i < title.length; i++) {
                     Label label=new Label(i, 0, title[i]);
                     writableSheet.addCell(label);
@@ -192,13 +192,15 @@ public class ExcelUtils {
             Label label0=new Label(0, rowNumbers, bean.getSn());
             Label label1=new Label(1, rowNumbers, bean.getDeviceID());
             Label label2=new Label(2, rowNumbers, bean.getCurrent());
-            Label label3=new Label(3, rowNumbers, bean.getTestResult());
-            Label label4=new Label(4, rowNumbers, bean.getTestDate());
+            Label label3=new Label(3, rowNumbers, bean.getCurrentThresHold());
+            Label label4=new Label(4, rowNumbers, bean.getTestResult());
+            Label label5=new Label(5, rowNumbers, bean.getTestDate());
             writableSheet.addCell(label0);
             writableSheet.addCell(label1);
             writableSheet.addCell(label2);
             writableSheet.addCell(label3);
             writableSheet.addCell(label4);
+            writableSheet.addCell(label5);
             workbook.write();
             isSave=true;
         } catch (Exception e) {

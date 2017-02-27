@@ -53,16 +53,15 @@ public class SActivity extends AppCompatActivity {
     EditText edit_machineid;
     @BindView(R.id.search_deviceid_result)
     TextView search_deviceid_result;
-    @BindView(R.id.et_current)
-    EditText et_current;
-    @BindView(R.id.et_deviation)
-    EditText et_deviation;
+    @BindView(R.id.s_ed_write_device_current)
+    EditText s_ed_write_device_current;
     ProgressDialog progressDialog;
 
     String scanTarget;
 
     boolean isCurrentRawPass=false;
     boolean isDeviceIdPass=false;
+    boolean isSetCurrentThresHold=false;
 
     Handler handlerConnState=new Handler() {
         @Override
@@ -87,6 +86,7 @@ public class SActivity extends AppCompatActivity {
                 search_deviceid_result.setText("查询结果：暂无");
                 isCurrentRawPass=false;
                 isDeviceIdPass=false;
+                isSetCurrentThresHold=false;
             }
             else if (msg.what== BLEFramework.STATE_SCANNED) {
                 EventBus.getDefault().post(""+BLEFramework.STATE_SCANNED);
@@ -110,20 +110,23 @@ public class SActivity extends AppCompatActivity {
                 }
             }
             else if (msg.what==com.renyu.bledemo.params.CommonParams.GET_DEVICE_CURRENT_RESP) {
-                int tempInt=Integer.parseInt(msg.obj.toString());
-                double et_current_num= TextUtils.isEmpty(et_current.getText().toString())?
-                        0.45:Double.parseDouble(et_current.getText().toString());
-                double et_deviation_num= TextUtils.isEmpty(et_deviation.getText().toString())?
-                        15:Double.parseDouble(et_deviation.getText().toString());
-                double low=et_current_num*10*(100-et_deviation_num);
-                double max=et_current_num*10*(100+et_deviation_num);
-                if (tempInt>low && tempInt<max) {
+                if (msg.arg1==1) {
                     Toast.makeText(SActivity.this, "Read Current Raw value成功", Toast.LENGTH_SHORT).show();
                     isCurrentRawPass=true;
                 }
                 else {
                     Toast.makeText(SActivity.this, "Read Current Raw value失败", Toast.LENGTH_SHORT).show();
                     isCurrentRawPass=false;
+                }
+            }
+            else if (msg.what==com.renyu.bledemo.params.CommonParams.SET_CURRENT_THRESHOLD_RESP) {
+                if (msg.arg1==1) {
+                    Toast.makeText(SActivity.this, "set Current threshold成功", Toast.LENGTH_SHORT).show();
+                    isSetCurrentThresHold=true;
+                }
+                else {
+                    Toast.makeText(SActivity.this, "set Current threshold失败", Toast.LENGTH_SHORT).show();
+                    isSetCurrentThresHold=false;
                 }
             }
         }
@@ -186,6 +189,17 @@ public class SActivity extends AppCompatActivity {
                         temp[1]=response[2];
                         int tempInt= HexUtil.byte2ToInt(temp);
                         message.obj=tempInt;
+                        message.arg1=1;
+                    }
+                    if ((response[0]&0xff) == com.renyu.bledemo.params.CommonParams.SET_CURRENT_THRESHOLD_RESP) {
+                        if ((int) response[1]==1) {
+                            isSetCurrentThresHold=true;
+                            message.arg1=1;
+                        }
+                        else {
+                            isSetCurrentThresHold=false;
+                            message.arg1=-1;
+                        }
                     }
                     handlerCallbackValue.sendMessage(message);
                 }
@@ -250,7 +264,7 @@ public class SActivity extends AppCompatActivity {
         }
     }
 
-    @OnClick({R.id.button_setdeviceid,
+    @OnClick({R.id.button_setdeviceid, R.id.s_button_write_device_current,
             R.id.read_from_excel, R.id.button_save_to_excel, R.id.button_qrcode_scan,
             R.id.search_deviceid, R.id.s_button_get_device_current})
     public void onClick(View view) {
@@ -277,9 +291,10 @@ public class SActivity extends AppCompatActivity {
                 else {
                     AddRequestBean bean=new AddRequestBean();
                     bean.setCurrent(isCurrentRawPass?"Pass":"Fail");
+                    bean.setCurrentThresHold(isSetCurrentThresHold?"Pass":"Fail");
                     bean.setSn(ACache.get(SActivity.this).getAsString("sn"));
                     bean.setDeviceID(ACache.get(SActivity.this).getAsString("deviceId"));
-                    bean.setTestResult(isDeviceIdPass && isCurrentRawPass?"Pass":"Fail");
+                    bean.setTestResult(isDeviceIdPass && isCurrentRawPass && isSetCurrentThresHold?"Pass":"Fail");
                     SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     bean.setTestDate(dateFormat.format(new Date()));
                     if (ExcelUtils.writeSExcel(Environment.getExternalStorageDirectory().getPath()+ File.separator+ com.renyu.bledemo.params.CommonParams.WRITEFILE_S, bean)) {
@@ -290,6 +305,7 @@ public class SActivity extends AppCompatActivity {
                         search_deviceid_result.setText("查询结果：暂无");
                         isCurrentRawPass=false;
                         isDeviceIdPass=false;
+                        isSetCurrentThresHold=false;
                     }
                     else {
                         Toast.makeText(this, "保存失败", Toast.LENGTH_SHORT).show();
@@ -354,6 +370,9 @@ public class SActivity extends AppCompatActivity {
                 break;
             case R.id.s_button_get_device_current:
                 DataUtils.getDeviceCurrentReq(bleFramework);
+                break;
+            case R.id.s_button_write_device_current:
+                DataUtils.setCurrentThreshold(bleFramework, Integer.parseInt(s_ed_write_device_current.getText().toString()));
                 break;
         }
     }

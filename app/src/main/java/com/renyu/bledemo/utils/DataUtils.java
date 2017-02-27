@@ -149,6 +149,10 @@ public class DataUtils {
         addCommand(bleFramework, (byte) CommonParams.SET_MAGIC_REQ, bytes);
     }
 
+    public static void setCurrentThreshold(BLEFramework bleFramework, int number) {
+        addCommand(bleFramework, (byte) CommonParams.SET_CURRENT_THRESHOLD_REQ, HexUtil.intToBytes(number));
+    }
+
     public static void enterOta(BLEFramework bleFramework) {
         byte[] bytes=new byte[1];
         bytes[0]=(byte) 0x90;

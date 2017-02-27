@@ -15,6 +15,7 @@ public class AddRequestBean extends RealmObject {
     String sn;
     String testResult;
     String current;
+    String currentThresHold;
     String testDate;
 
     public String getSn() {
@@ -71,5 +72,13 @@ public class AddRequestBean extends RealmObject {
 
     public void setCurrent(String current) {
         this.current = current;
+    }
+
+    public String getCurrentThresHold() {
+        return currentThresHold;
+    }
+
+    public void setCurrentThresHold(String currentThresHold) {
+        this.currentThresHold = currentThresHold;
     }
 }
