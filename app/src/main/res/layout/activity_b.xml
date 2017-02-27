@@ -52,16 +52,16 @@
         app:layout_constraintLeft_toLeftOf="@+id/b_ble_state" />
 
     <Button
-        android:text="点击写入"
+        android:text="点击写入magic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/b_button_sn"
+        android:id="@+id/b_button_magic"
         app:layout_constraintLeft_toLeftOf="@+id/textView9"
         android:layout_marginTop="8dp"
         app:layout_constraintTop_toBottomOf="@+id/textView9" />
 
     <TextView
-        android:text="3. 生成二维码，上传"
+        android:text="4. 生成二维码，上传"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/textView10"
@@ -120,14 +120,23 @@
         android:layout_height="wrap_content"
         android:id="@+id/textView8"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/b_button_sn"
-        app:layout_constraintLeft_toLeftOf="@+id/b_button_sn" />
+        app:layout_constraintTop_toBottomOf="@+id/b_button_magic"
+        app:layout_constraintLeft_toLeftOf="@+id/b_button_magic" />
 
     <ImageView
-        android:layout_width="100dip"
-        android:layout_height="100dip"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:id="@+id/iv_qrcode"
         android:layout_marginStart="56dp"
         app:layout_constraintLeft_toRightOf="@+id/textView10"
         app:layout_constraintTop_toTopOf="@+id/textView10" />
+
+    <Button
+        android:text="点击写入sn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/b_button_sn"
+        android:layout_marginStart="8dp"
+        app:layout_constraintLeft_toRightOf="@+id/b_button_magic"
+        app:layout_constraintTop_toTopOf="@+id/b_button_magic" />
 </android.support.constraint.ConstraintLayout>

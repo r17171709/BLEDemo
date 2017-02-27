@@ -14,6 +14,7 @@ public class AddBRequestBean {
     String sn_state;
     String testResult;
     String testDate;
+    String magic;
 
     public String getSn() {
         return sn;
@@ -85,5 +86,13 @@ public class AddBRequestBean {
 
     public void setSn_state(String sn_state) {
         this.sn_state = sn_state;
+    }
+
+    public String getMagic() {
+        return magic;
+    }
+
+    public void setMagic(String magic) {
+        this.magic = magic;
     }
 }

@@ -32,9 +32,9 @@ public class CommonParams {
     // 半制测试生成二维码
     public static final String BARCODEFILE="code.jpg";
     // 半制测试使用
-    public static final String WRITEFILE_B="testb.xQls";
+    public static final String WRITEFILE_B="testb.xls";
     // 全制测试使用
     public static final String WRITEFILE_Q="testq.xls";
 
-    public static final int RSSIWRONG=-40;
+    public static final int RSSIWRONG=-80;
 }

@@ -14,6 +14,7 @@ public class AddRequestBean extends RealmObject {
     String machineName;
     String sn;
     String testResult;
+    String current;
     String testDate;
 
     public String getSn() {
@@ -62,5 +63,13 @@ public class AddRequestBean extends RealmObject {
 
     public void setMachineName(String machineName) {
         this.machineName = machineName;
+    }
+
+    public String getCurrent() {
+        return current;
+    }
+
+    public void setCurrent(String current) {
+        this.current = current;
     }
 }

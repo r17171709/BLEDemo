@@ -48,7 +48,7 @@ public class ExcelUtils {
                 OutputStream os=new FileOutputStream(file);
                 workbook= Workbook.createWorkbook(os);
                 writableSheet=workbook.createSheet("半制测试结果", 0);
-                String[] title={"SN", "RSSI", "LED", "蜂鸣器", "RFID", "电流传感器校准", "SN写入情况", "测试结果", "测试时间"};
+                String[] title={"SN", "RSSI", "LED", "蜂鸣器", "RFID", "电流传感器校准", "SN写入情况", "MAGIC写入情况", "测试结果", "测试时间"};
                 for (int i = 0; i < title.length; i++) {
                     Label label=new Label(i, 0, title[i]);
                     writableSheet.addCell(label);
@@ -66,8 +66,9 @@ public class ExcelUtils {
             Label label4=new Label(4, rowNumbers, bean.getRfid());
             Label label5=new Label(5, rowNumbers, bean.getCurrent_sensor());
             Label label6=new Label(6, rowNumbers, bean.getSn_state());
-            Label label7=new Label(7, rowNumbers, bean.getTestResult());
-            Label label8=new Label(8, rowNumbers, bean.getTestDate());
+            Label label7=new Label(7, rowNumbers, bean.getMagic());
+            Label label8=new Label(8, rowNumbers, bean.getTestResult());
+            Label label9=new Label(9, rowNumbers, bean.getTestDate());
             writableSheet.addCell(label0);
             writableSheet.addCell(label1);
             writableSheet.addCell(label2);
@@ -77,6 +78,7 @@ public class ExcelUtils {
             writableSheet.addCell(label6);
             writableSheet.addCell(label7);
             writableSheet.addCell(label8);
+            writableSheet.addCell(label9);
             workbook.write();
             isSave=true;
         } catch (Exception e) {
@@ -176,7 +178,7 @@ public class ExcelUtils {
                 OutputStream os=new FileOutputStream(file);
                 workbook= Workbook.createWorkbook(os);
                 writableSheet=workbook.createSheet("施工测试结果", 0);
-                String[] title={"SN", "deviceId", "测试结果", "测试时间"};
+                String[] title={"SN", "deviceId", "负载测试", "测试结果", "测试时间"};
                 for (int i = 0; i < title.length; i++) {
                     Label label=new Label(i, 0, title[i]);
                     writableSheet.addCell(label);
@@ -189,12 +191,14 @@ public class ExcelUtils {
             }
             Label label0=new Label(0, rowNumbers, bean.getSn());
             Label label1=new Label(1, rowNumbers, bean.getDeviceID());
-            Label label2=new Label(2, rowNumbers, bean.getTestResult());
-            Label label3=new Label(3, rowNumbers, bean.getTestDate());
+            Label label2=new Label(2, rowNumbers, bean.getCurrent());
+            Label label3=new Label(3, rowNumbers, bean.getTestResult());
+            Label label4=new Label(4, rowNumbers, bean.getTestDate());
             writableSheet.addCell(label0);
             writableSheet.addCell(label1);
             writableSheet.addCell(label2);
             writableSheet.addCell(label3);
+            writableSheet.addCell(label4);
             workbook.write();
             isSave=true;
         } catch (Exception e) {

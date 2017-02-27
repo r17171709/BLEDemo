@@ -29,6 +29,7 @@ import com.renyu.blelibrary.impl.BLEStateChangeListener;
 import com.renyu.blelibrary.params.CommonParams;
 import com.renyu.blelibrary.utils.ACache;
 import com.renyu.blelibrary.utils.BLEUtils;
+import com.renyu.blelibrary.utils.HexUtil;
 import com.renyu.qrcodelibrary.ZBarQRScanActivity;
 
 import org.greenrobot.eventbus.EventBus;
@@ -52,9 +53,16 @@ public class SActivity extends AppCompatActivity {
     EditText edit_machineid;
     @BindView(R.id.search_deviceid_result)
     TextView search_deviceid_result;
+    @BindView(R.id.et_current)
+    EditText et_current;
+    @BindView(R.id.et_deviation)
+    EditText et_deviation;
     ProgressDialog progressDialog;
 
     String scanTarget;
+
+    boolean isCurrentRawPass=false;
+    boolean isDeviceIdPass=false;
 
     Handler handlerConnState=new Handler() {
         @Override
@@ -77,6 +85,8 @@ public class SActivity extends AppCompatActivity {
                 ble_state.setText("BLE状态：连接断开");
                 edit_machineid.setText("");
                 search_deviceid_result.setText("查询结果：暂无");
+                isCurrentRawPass=false;
+                isDeviceIdPass=false;
             }
             else if (msg.what== BLEFramework.STATE_SCANNED) {
                 EventBus.getDefault().post(""+BLEFramework.STATE_SCANNED);
@@ -97,6 +107,23 @@ public class SActivity extends AppCompatActivity {
                 }
                 else {
                     Toast.makeText(SActivity.this, "deviceId写入失败", Toast.LENGTH_SHORT).show();
+                }
+            }
+            else if (msg.what==com.renyu.bledemo.params.CommonParams.GET_DEVICE_CURRENT_RESP) {
+                int tempInt=Integer.parseInt(msg.obj.toString());
+                double et_current_num= TextUtils.isEmpty(et_current.getText().toString())?
+                        0.45:Double.parseDouble(et_current.getText().toString());
+                double et_deviation_num= TextUtils.isEmpty(et_deviation.getText().toString())?
+                        15:Double.parseDouble(et_deviation.getText().toString());
+                double low=et_current_num*10*(100-et_deviation_num);
+                double max=et_current_num*10*(100+et_deviation_num);
+                if (tempInt>low && tempInt<max) {
+                    Toast.makeText(SActivity.this, "Read Current Raw value成功", Toast.LENGTH_SHORT).show();
+                    isCurrentRawPass=true;
+                }
+                else {
+                    Toast.makeText(SActivity.this, "Read Current Raw value失败", Toast.LENGTH_SHORT).show();
+                    isCurrentRawPass=false;
                 }
             }
         }
@@ -145,13 +172,20 @@ public class SActivity extends AppCompatActivity {
                     message.what=response[0]&0xff;
                     if ((response[0]&0xff) == com.renyu.bledemo.params.CommonParams.SET_DEVICEID_RESP) {
                         if ((int) response[2]==1) {
-                            ACache.get(SActivity.this).put("ble_check", "Pass");
+                            isDeviceIdPass=true;
                             message.arg1=1;
                         }
                         else {
-                            ACache.get(SActivity.this).put("ble_check", "Fail");
+                            isDeviceIdPass=false;
                             message.arg1=-1;
                         }
+                    }
+                    if ((response[0]&0xff) == com.renyu.bledemo.params.CommonParams.GET_DEVICE_CURRENT_RESP) {
+                        byte[] temp=new byte[2];
+                        temp[0]=response[1];
+                        temp[1]=response[2];
+                        int tempInt= HexUtil.byte2ToInt(temp);
+                        message.obj=tempInt;
                     }
                     handlerCallbackValue.sendMessage(message);
                 }
@@ -216,9 +250,9 @@ public class SActivity extends AppCompatActivity {
         }
     }
 
-    @OnClick({R.id.button_setdeviceid, R.id.button_start_search,
+    @OnClick({R.id.button_setdeviceid,
             R.id.read_from_excel, R.id.button_save_to_excel, R.id.button_qrcode_scan,
-            R.id.search_deviceid})
+            R.id.search_deviceid, R.id.s_button_get_device_current})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_setdeviceid:
@@ -235,20 +269,17 @@ public class SActivity extends AppCompatActivity {
                     Toast.makeText(this, "BLE连接断开，暂时无法发送", Toast.LENGTH_SHORT).show();
                 }
                 break;
-            case R.id.button_start_search:
-//                openBlueTooth(null);
-                break;
             case R.id.button_save_to_excel:
                 if (ACache.get(SActivity.this).getAsString("sn")==null ||
-                        ACache.get(SActivity.this).getAsString("deviceId")==null ||
-                        ACache.get(SActivity.this).getAsString("ble_check")==null) {
+                        ACache.get(SActivity.this).getAsString("deviceId")==null) {
                     Toast.makeText(this, "暂无sn与deviceId信息，不能保存", Toast.LENGTH_SHORT).show();
                 }
                 else {
                     AddRequestBean bean=new AddRequestBean();
+                    bean.setCurrent(isCurrentRawPass?"Pass":"Fail");
                     bean.setSn(ACache.get(SActivity.this).getAsString("sn"));
                     bean.setDeviceID(ACache.get(SActivity.this).getAsString("deviceId"));
-                    bean.setTestResult(ACache.get(SActivity.this).getAsString("ble_check"));
+                    bean.setTestResult(isDeviceIdPass && isCurrentRawPass?"Pass":"Fail");
                     SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     bean.setTestDate(dateFormat.format(new Date()));
                     if (ExcelUtils.writeSExcel(Environment.getExternalStorageDirectory().getPath()+ File.separator+ com.renyu.bledemo.params.CommonParams.WRITEFILE_S, bean)) {
@@ -257,6 +288,8 @@ public class SActivity extends AppCompatActivity {
                         bleFramework.disConnect();
                         edit_machineid.setText("");
                         search_deviceid_result.setText("查询结果：暂无");
+                        isCurrentRawPass=false;
+                        isDeviceIdPass=false;
                     }
                     else {
                         Toast.makeText(this, "保存失败", Toast.LENGTH_SHORT).show();
@@ -318,6 +351,9 @@ public class SActivity extends AppCompatActivity {
                         ACache.get(SActivity.this).put("deviceId", temps.get(0).getDeviceID());
                     }
                 }
+                break;
+            case R.id.s_button_get_device_current:
+                DataUtils.getDeviceCurrentReq(bleFramework);
                 break;
         }
     }

@@ -126,6 +126,15 @@ public class BActivity extends AppCompatActivity {
                     uploadData(2);
                 }
             }
+            else if (msg.what==com.renyu.bledemo.params.CommonParams.SET_MAGIC_RESP) {
+                if (msg.arg1==1) {
+                    Toast.makeText(BActivity.this, "magic写入成功", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(BActivity.this, "magic写入失败", Toast.LENGTH_SHORT).show();
+                    uploadData(4);
+                }
+            }
         }
     };
 
@@ -178,6 +187,14 @@ public class BActivity extends AppCompatActivity {
                             message.arg1=-1;
                         }
                     }
+                    if ((response[0]&0xff) == com.renyu.bledemo.params.CommonParams.SET_MAGIC_RESP) {
+                        if ((int) response[2]==1) {
+                            message.arg1=1;
+                        }
+                        else {
+                            message.arg1=-1;
+                        }
+                    }
                     handlerCallbackValue.sendMessage(message);
                 }
                 else {
@@ -220,6 +237,7 @@ public class BActivity extends AppCompatActivity {
             getDevices();
         }
         else if (requestCode==com.renyu.bledemo.params.CommonParams.SCANDEVICE && resultCode==RESULT_OK) {
+            iv_qrcode.setImageBitmap(null);
             BluetoothDevice bleDevice=data.getParcelableExtra("device");
             // 存储SN
             ACache.get(BActivity.this).put("sn", data.getStringExtra("sn"));
@@ -242,7 +260,7 @@ public class BActivity extends AppCompatActivity {
         }
     }
 
-    @OnClick({R.id.b_button_scanall, R.id.b_button_sn, R.id.b_button_upload})
+    @OnClick({R.id.b_button_scanall, R.id.b_button_sn, R.id.b_button_upload, R.id.b_button_magic})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.b_button_scanall:
@@ -251,6 +269,14 @@ public class BActivity extends AppCompatActivity {
             case R.id.b_button_sn:
                 if (!b_ble_state.getText().toString().equals("BLE状态：连接断开")) {
                     DataUtils.setSNReq(bleFramework, ACache.get(BActivity.this).getAsString("sn"));
+                }
+                else {
+                    Toast.makeText(this, "BLE连接断开，暂时无法发送", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case R.id.b_button_magic:
+                if (!b_ble_state.getText().toString().equals("BLE状态：连接断开")) {
+                    DataUtils.setMagicReq(bleFramework, (byte) 0x66);
                 }
                 else {
                     Toast.makeText(this, "BLE连接断开，暂时无法发送", Toast.LENGTH_SHORT).show();
@@ -333,6 +359,7 @@ public class BActivity extends AppCompatActivity {
             bean.setLed("设备无法连接，无法获取该值");
             bean.setRfid("设备无法连接，无法获取该值");
             bean.setSn_state("设备无法连接，无法获取该值");
+            bean.setMagic("设备无法连接，无法获取该值");
             bean.setTestResult("Fail");
         }
         else if (errorCode==2) {
@@ -341,6 +368,16 @@ public class BActivity extends AppCompatActivity {
             bean.setLed(cb_led.isChecked()?"Pass":"Fail");
             bean.setRfid(cb_rfid.isChecked()?"Pass":"Fail");
             bean.setSn_state("SN无法写入");
+            bean.setMagic("暂未测试");
+            bean.setTestResult("Fail");
+        }
+        else if (errorCode==4) {
+            bean.setBuzzer(cb_buzzer.isChecked()?"Pass":"Fail");
+            bean.setCurrent_sensor(cb_current_sensor.isChecked()?"Pass":"Fail");
+            bean.setLed(cb_led.isChecked()?"Pass":"Fail");
+            bean.setRfid(cb_rfid.isChecked()?"Pass":"Fail");
+            bean.setSn_state("暂未测试");
+            bean.setMagic("MAGIC无法写入");
             bean.setTestResult("Fail");
         }
         else if (errorCode==1) {
@@ -349,6 +386,7 @@ public class BActivity extends AppCompatActivity {
             bean.setLed("rssi不符合测试判断依据，无法获取该值");
             bean.setRfid("rssi不符合测试判断依据，无法获取该值");
             bean.setSn_state("rssi不符合测试判断依据，无法获取该值");
+            bean.setMagic("rssi不符合测试判断依据，无法获取该值");
             bean.setTestResult("Fail");
         }
         else if (errorCode==-1) {
@@ -357,6 +395,7 @@ public class BActivity extends AppCompatActivity {
             bean.setLed(cb_led.isChecked()?"Pass":"Fail");
             bean.setRfid(cb_rfid.isChecked()?"Pass":"Fail");
             bean.setSn_state("SN正常写入");
+            bean.setMagic("MAGIC正常写入");
             if (cb_buzzer.isChecked() &&
                     cb_current_sensor.isChecked() &&
                     cb_led.isChecked() &&
