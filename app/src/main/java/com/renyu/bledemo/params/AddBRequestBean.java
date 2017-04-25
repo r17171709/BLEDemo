@@ -15,6 +15,7 @@ public class AddBRequestBean {
     String testResult;
     String testDate;
     String magic;
+    String open;
 
     public String getSn() {
         return sn;
@@ -94,5 +95,13 @@ public class AddBRequestBean {
 
     public void setMagic(String magic) {
         this.magic = magic;
+    }
+
+    public String getOpen() {
+        return open;
+    }
+
+    public void setOpen(String open) {
+        this.open = open;
     }
 }

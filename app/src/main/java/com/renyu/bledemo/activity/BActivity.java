@@ -61,6 +61,8 @@ public class BActivity extends AppCompatActivity {
 
     @BindView(R.id.b_ble_state)
     TextView b_ble_state;
+    @BindView(R.id.b_ble_sn)
+    TextView b_ble_sn;
     @BindView(R.id.b_ble_rssi)
     TextView b_ble_rssi;
     @BindView(R.id.cb_led)
@@ -71,6 +73,8 @@ public class BActivity extends AppCompatActivity {
     CheckBox cb_rfid;
     @BindView(R.id.cb_current_sensor)
     CheckBox cb_current_sensor;
+    @BindView(R.id.cb_open)
+    CheckBox cb_open;
     @BindView(R.id.iv_qrcode)
     ImageView iv_qrcode;
     ProgressDialog progressDialog;
@@ -93,10 +97,11 @@ public class BActivity extends AppCompatActivity {
                     Toast.makeText(BActivity.this, "连接断开", Toast.LENGTH_SHORT).show();
                 }
                 ACache.get(BActivity.this).clear();
-                b_ble_rssi.setText("rssi(正常范围大于-40)：暂无");
+                b_ble_rssi.setText("rssi：暂无");
                 b_ble_state.setText("BLE状态：连接断开");
                 cb_buzzer.setChecked(false);
                 cb_current_sensor.setChecked(false);
+                cb_open.setChecked(false);
                 cb_led.setChecked(false);
                 cb_rfid.setChecked(false);
             }
@@ -112,10 +117,6 @@ public class BActivity extends AppCompatActivity {
             super.handleMessage(msg);
             if (msg.what==com.renyu.bledemo.params.CommonParams.ERROR_RESP) {
                 Toast.makeText(BActivity.this, "指令执行出错", Toast.LENGTH_SHORT).show();
-            }
-            else if (msg.what== com.renyu.bledemo.params.CommonParams.ERROR_RSSI) {
-                Toast.makeText(BActivity.this, "rssi不符合测试判断依据", Toast.LENGTH_SHORT).show();
-                uploadData(1);
             }
             else if (msg.what==com.renyu.bledemo.params.CommonParams.SET_SN_RESP) {
                 if (msg.arg1==1) {
@@ -240,20 +241,13 @@ public class BActivity extends AppCompatActivity {
             iv_qrcode.setImageBitmap(null);
             BluetoothDevice bleDevice=data.getParcelableExtra("device");
             // 存储SN
+            b_ble_sn.setText(data.getStringExtra("sn"));
             ACache.get(BActivity.this).put("sn", data.getStringExtra("sn"));
             // rssi
             ACache.get(BActivity.this).put("rssi", ""+data.getIntExtra("rssi", 0));
-            b_ble_rssi.setText("rssi(正常范围大于-40)："+data.getIntExtra("rssi", 0));
-            // rssi满足一定条件才能继续
-            if (data.getIntExtra("rssi", 0) < com.renyu.bledemo.params.CommonParams.RSSIWRONG) {
-                Message m=new Message();
-                m.what=com.renyu.bledemo.params.CommonParams.ERROR_RSSI;
-                handlerCallbackValue.sendMessage(m);
-            }
-            else {
-                bleFramework.startConn(bleDevice);
-                progressDialog= ProgressDialog.show(BActivity.this, "提示", "正在连接");
-            }
+            b_ble_rssi.setText("rssi："+data.getIntExtra("rssi", 0));
+            bleFramework.startConn(bleDevice);
+            progressDialog= ProgressDialog.show(BActivity.this, "提示", "正在连接");
         }
         else if (requestCode==com.renyu.bledemo.params.CommonParams.SCANDEVICE && resultCode==RESULT_CANCELED) {
             bleFramework.cancelScan();
@@ -288,7 +282,7 @@ public class BActivity extends AppCompatActivity {
                 }
                 else {
                     if (b_ble_state.getText().toString().equals("BLE状态：连接断开")) {
-                        if (b_ble_rssi.getText().toString().equals("rssi(正常范围大于-40)：暂无")) {
+                        if (b_ble_rssi.getText().toString().equals("rssi：暂无")) {
                             uploadData(3);
                         }
                         else {
@@ -365,6 +359,7 @@ public class BActivity extends AppCompatActivity {
         else if (errorCode==2) {
             bean.setBuzzer(cb_buzzer.isChecked()?"Pass":"Fail");
             bean.setCurrent_sensor(cb_current_sensor.isChecked()?"Pass":"Fail");
+            bean.setOpen(cb_open.isChecked()?"Pass":"Fail");
             bean.setLed(cb_led.isChecked()?"Pass":"Fail");
             bean.setRfid(cb_rfid.isChecked()?"Pass":"Fail");
             bean.setSn_state("SN无法写入");
@@ -374,24 +369,17 @@ public class BActivity extends AppCompatActivity {
         else if (errorCode==4) {
             bean.setBuzzer(cb_buzzer.isChecked()?"Pass":"Fail");
             bean.setCurrent_sensor(cb_current_sensor.isChecked()?"Pass":"Fail");
+            bean.setOpen(cb_open.isChecked()?"Pass":"Fail");
             bean.setLed(cb_led.isChecked()?"Pass":"Fail");
             bean.setRfid(cb_rfid.isChecked()?"Pass":"Fail");
             bean.setSn_state("暂未测试");
             bean.setMagic("MAGIC无法写入");
             bean.setTestResult("Fail");
         }
-        else if (errorCode==1) {
-            bean.setBuzzer("rssi不符合测试判断依据，无法获取该值");
-            bean.setCurrent_sensor("rssi不符合测试判断依据，无法获取该值");
-            bean.setLed("rssi不符合测试判断依据，无法获取该值");
-            bean.setRfid("rssi不符合测试判断依据，无法获取该值");
-            bean.setSn_state("rssi不符合测试判断依据，无法获取该值");
-            bean.setMagic("rssi不符合测试判断依据，无法获取该值");
-            bean.setTestResult("Fail");
-        }
         else if (errorCode==-1) {
             bean.setBuzzer(cb_buzzer.isChecked()?"Pass":"Fail");
             bean.setCurrent_sensor(cb_current_sensor.isChecked()?"Pass":"Fail");
+            bean.setOpen(cb_open.isChecked()?"Pass":"Fail");
             bean.setLed(cb_led.isChecked()?"Pass":"Fail");
             bean.setRfid(cb_rfid.isChecked()?"Pass":"Fail");
             bean.setSn_state("SN正常写入");
@@ -399,7 +387,8 @@ public class BActivity extends AppCompatActivity {
             if (cb_buzzer.isChecked() &&
                     cb_current_sensor.isChecked() &&
                     cb_led.isChecked() &&
-                    cb_rfid.isChecked()) {
+                    cb_rfid.isChecked() &&
+                    cb_open.isChecked()) {
                 bean.setTestResult("Pass");
             }
             else {
@@ -412,9 +401,10 @@ public class BActivity extends AppCompatActivity {
             Toast.makeText(BActivity.this, "保存成功", Toast.LENGTH_SHORT).show();
             ACache.get(BActivity.this).clear();
             bleFramework.disConnect();
-            b_ble_rssi.setText("rssi(正常范围大于-40)：暂无");
+            b_ble_rssi.setText("rssi：暂无");
             cb_buzzer.setChecked(false);
             cb_current_sensor.setChecked(false);
+            cb_open.setChecked(false);
             cb_led.setChecked(false);
             cb_rfid.setChecked(false);
         }

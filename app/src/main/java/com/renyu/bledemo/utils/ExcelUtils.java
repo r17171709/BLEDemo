@@ -48,7 +48,7 @@ public class ExcelUtils {
                 OutputStream os=new FileOutputStream(file);
                 workbook= Workbook.createWorkbook(os);
                 writableSheet=workbook.createSheet("半制测试结果", 0);
-                String[] title={"SN", "RSSI", "LED", "蜂鸣器", "RFID", "电流传感器校准", "SN写入情况", "MAGIC写入情况", "测试结果", "测试时间"};
+                String[] title={"SN", "RSSI", "LED", "蜂鸣器", "RFID", "电流传感器校准", "SN写入情况", "MAGIC写入情况", "防拆测试", "测试结果", "测试时间"};
                 for (int i = 0; i < title.length; i++) {
                     Label label=new Label(i, 0, title[i]);
                     writableSheet.addCell(label);
@@ -67,8 +67,9 @@ public class ExcelUtils {
             Label label5=new Label(5, rowNumbers, bean.getCurrent_sensor());
             Label label6=new Label(6, rowNumbers, bean.getSn_state());
             Label label7=new Label(7, rowNumbers, bean.getMagic());
-            Label label8=new Label(8, rowNumbers, bean.getTestResult());
-            Label label9=new Label(9, rowNumbers, bean.getTestDate());
+            Label label8=new Label(8, rowNumbers, bean.getOpen());
+            Label label9=new Label(9, rowNumbers, bean.getTestResult());
+            Label label10=new Label(10, rowNumbers, bean.getTestDate());
             writableSheet.addCell(label0);
             writableSheet.addCell(label1);
             writableSheet.addCell(label2);
@@ -79,6 +80,7 @@ public class ExcelUtils {
             writableSheet.addCell(label7);
             writableSheet.addCell(label8);
             writableSheet.addCell(label9);
+            writableSheet.addCell(label10);
             workbook.write();
             isSave=true;
         } catch (Exception e) {
