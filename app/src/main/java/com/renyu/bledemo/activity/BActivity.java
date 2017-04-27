@@ -14,7 +14,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -65,16 +64,6 @@ public class BActivity extends AppCompatActivity {
     TextView b_ble_sn;
     @BindView(R.id.b_ble_rssi)
     TextView b_ble_rssi;
-    @BindView(R.id.cb_led)
-    CheckBox cb_led;
-    @BindView(R.id.cb_buzzer)
-    CheckBox cb_buzzer;
-    @BindView(R.id.cb_rfid)
-    CheckBox cb_rfid;
-    @BindView(R.id.cb_current_sensor)
-    CheckBox cb_current_sensor;
-    @BindView(R.id.cb_open)
-    CheckBox cb_open;
     @BindView(R.id.iv_qrcode)
     ImageView iv_qrcode;
     ProgressDialog progressDialog;
@@ -99,11 +88,6 @@ public class BActivity extends AppCompatActivity {
                 ACache.get(BActivity.this).clear();
                 b_ble_rssi.setText("rssi：暂无");
                 b_ble_state.setText("BLE状态：连接断开");
-                cb_buzzer.setChecked(false);
-                cb_current_sensor.setChecked(false);
-                cb_open.setChecked(false);
-                cb_led.setChecked(false);
-                cb_rfid.setChecked(false);
             }
             else if (msg.what== BLEFramework.STATE_SCANNED) {
                 EventBus.getDefault().post(""+BLEFramework.STATE_SCANNED);
@@ -254,19 +238,11 @@ public class BActivity extends AppCompatActivity {
         }
     }
 
-    @OnClick({R.id.b_button_scanall, R.id.b_button_sn, R.id.b_button_upload, R.id.b_button_magic})
+    @OnClick({R.id.b_button_scanall, R.id.b_button_upload, R.id.b_button_magic})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.b_button_scanall:
                 openBlueTooth();
-                break;
-            case R.id.b_button_sn:
-                if (!b_ble_state.getText().toString().equals("BLE状态：连接断开")) {
-                    DataUtils.setSNReq(bleFramework, ACache.get(BActivity.this).getAsString("sn"));
-                }
-                else {
-                    Toast.makeText(this, "BLE连接断开，暂时无法发送", Toast.LENGTH_SHORT).show();
-                }
                 break;
             case R.id.b_button_magic:
                 if (!b_ble_state.getText().toString().equals("BLE状态：连接断开")) {
@@ -282,12 +258,7 @@ public class BActivity extends AppCompatActivity {
                 }
                 else {
                     if (b_ble_state.getText().toString().equals("BLE状态：连接断开")) {
-                        if (b_ble_rssi.getText().toString().equals("rssi：暂无")) {
-                            uploadData(3);
-                        }
-                        else {
-                            uploadData(1);
-                        }
+                        uploadData(3);
                     }
                     else {
                         saveImage();
@@ -348,52 +319,24 @@ public class BActivity extends AppCompatActivity {
         bean.setSn(ACache.get(BActivity.this).getAsString("sn"));
         bean.setRssi(ACache.get(BActivity.this).getAsString("rssi"));
         if (errorCode==3) {
-            bean.setBuzzer("设备无法连接，无法获取该值");
-            bean.setCurrent_sensor("设备无法连接，无法获取该值");
-            bean.setLed("设备无法连接，无法获取该值");
-            bean.setRfid("设备无法连接，无法获取该值");
             bean.setSn_state("设备无法连接，无法获取该值");
             bean.setMagic("设备无法连接，无法获取该值");
             bean.setTestResult("Fail");
         }
         else if (errorCode==2) {
-            bean.setBuzzer(cb_buzzer.isChecked()?"Pass":"Fail");
-            bean.setCurrent_sensor(cb_current_sensor.isChecked()?"Pass":"Fail");
-            bean.setOpen(cb_open.isChecked()?"Pass":"Fail");
-            bean.setLed(cb_led.isChecked()?"Pass":"Fail");
-            bean.setRfid(cb_rfid.isChecked()?"Pass":"Fail");
             bean.setSn_state("SN无法写入");
             bean.setMagic("暂未测试");
             bean.setTestResult("Fail");
         }
         else if (errorCode==4) {
-            bean.setBuzzer(cb_buzzer.isChecked()?"Pass":"Fail");
-            bean.setCurrent_sensor(cb_current_sensor.isChecked()?"Pass":"Fail");
-            bean.setOpen(cb_open.isChecked()?"Pass":"Fail");
-            bean.setLed(cb_led.isChecked()?"Pass":"Fail");
-            bean.setRfid(cb_rfid.isChecked()?"Pass":"Fail");
             bean.setSn_state("暂未测试");
             bean.setMagic("MAGIC无法写入");
             bean.setTestResult("Fail");
         }
         else if (errorCode==-1) {
-            bean.setBuzzer(cb_buzzer.isChecked()?"Pass":"Fail");
-            bean.setCurrent_sensor(cb_current_sensor.isChecked()?"Pass":"Fail");
-            bean.setOpen(cb_open.isChecked()?"Pass":"Fail");
-            bean.setLed(cb_led.isChecked()?"Pass":"Fail");
-            bean.setRfid(cb_rfid.isChecked()?"Pass":"Fail");
             bean.setSn_state("SN正常写入");
             bean.setMagic("MAGIC正常写入");
-            if (cb_buzzer.isChecked() &&
-                    cb_current_sensor.isChecked() &&
-                    cb_led.isChecked() &&
-                    cb_rfid.isChecked() &&
-                    cb_open.isChecked()) {
-                bean.setTestResult("Pass");
-            }
-            else {
-                bean.setTestResult("Fail");
-            }
+            bean.setTestResult("Pass");
         }
         SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         bean.setTestDate(dateFormat.format(new Date()));
@@ -402,11 +345,6 @@ public class BActivity extends AppCompatActivity {
             ACache.get(BActivity.this).clear();
             bleFramework.disConnect();
             b_ble_rssi.setText("rssi：暂无");
-            cb_buzzer.setChecked(false);
-            cb_current_sensor.setChecked(false);
-            cb_open.setChecked(false);
-            cb_led.setChecked(false);
-            cb_rfid.setChecked(false);
         }
         else {
             Toast.makeText(BActivity.this, "保存失败", Toast.LENGTH_SHORT).show();

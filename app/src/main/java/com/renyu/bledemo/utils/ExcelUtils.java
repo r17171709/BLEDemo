@@ -48,7 +48,7 @@ public class ExcelUtils {
                 OutputStream os=new FileOutputStream(file);
                 workbook= Workbook.createWorkbook(os);
                 writableSheet=workbook.createSheet("半制测试结果", 0);
-                String[] title={"SN", "RSSI", "LED", "蜂鸣器", "RFID", "电流传感器校准", "SN写入情况", "MAGIC写入情况", "防拆测试", "测试结果", "测试时间"};
+                String[] title={"SN", "RSSI", "SN写入情况", "MAGIC写入情况", "测试结果", "测试时间"};
                 for (int i = 0; i < title.length; i++) {
                     Label label=new Label(i, 0, title[i]);
                     writableSheet.addCell(label);
@@ -61,26 +61,16 @@ public class ExcelUtils {
             }
             Label label0=new Label(0, rowNumbers, bean.getSn());
             Label label1=new Label(1, rowNumbers, bean.getRssi());
-            Label label2=new Label(2, rowNumbers, bean.getLed());
-            Label label3=new Label(3, rowNumbers, bean.getBuzzer());
-            Label label4=new Label(4, rowNumbers, bean.getRfid());
-            Label label5=new Label(5, rowNumbers, bean.getCurrent_sensor());
-            Label label6=new Label(6, rowNumbers, bean.getSn_state());
-            Label label7=new Label(7, rowNumbers, bean.getMagic());
-            Label label8=new Label(8, rowNumbers, bean.getOpen());
-            Label label9=new Label(9, rowNumbers, bean.getTestResult());
-            Label label10=new Label(10, rowNumbers, bean.getTestDate());
+            Label label2=new Label(2, rowNumbers, bean.getSn_state());
+            Label label3=new Label(3, rowNumbers, bean.getMagic());
+            Label label4=new Label(4, rowNumbers, bean.getTestResult());
+            Label label5=new Label(5, rowNumbers, bean.getTestDate());
             writableSheet.addCell(label0);
             writableSheet.addCell(label1);
             writableSheet.addCell(label2);
             writableSheet.addCell(label3);
             writableSheet.addCell(label4);
             writableSheet.addCell(label5);
-            writableSheet.addCell(label6);
-            writableSheet.addCell(label7);
-            writableSheet.addCell(label8);
-            writableSheet.addCell(label9);
-            writableSheet.addCell(label10);
             workbook.write();
             isSave=true;
         } catch (Exception e) {
