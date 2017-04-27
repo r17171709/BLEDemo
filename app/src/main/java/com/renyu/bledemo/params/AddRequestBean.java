@@ -12,6 +12,7 @@ public class AddRequestBean extends RealmObject {
     @PrimaryKey
     String machineId;
     String machineName;
+    String machineNo;
     String sn;
     String testResult;
     String current;
@@ -80,5 +81,13 @@ public class AddRequestBean extends RealmObject {
 
     public void setCurrentThresHold(String currentThresHold) {
         this.currentThresHold = currentThresHold;
+    }
+
+    public String getMachineNo() {
+        return machineNo;
+    }
+
+    public void setMachineNo(String machineNo) {
+        this.machineNo = machineNo;
     }
 }

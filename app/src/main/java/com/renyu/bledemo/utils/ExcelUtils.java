@@ -170,7 +170,7 @@ public class ExcelUtils {
                 OutputStream os=new FileOutputStream(file);
                 workbook= Workbook.createWorkbook(os);
                 writableSheet=workbook.createSheet("施工测试结果", 0);
-                String[] title={"SN", "deviceId", "读取阈值", "写阈值", "测试结果", "测试时间"};
+                String[] title={"SN", "deviceId", "标定电流", "仪器设备编号", "仪器名称", "测试结果", "测试时间"};
                 for (int i = 0; i < title.length; i++) {
                     Label label=new Label(i, 0, title[i]);
                     writableSheet.addCell(label);
@@ -184,15 +184,17 @@ public class ExcelUtils {
             Label label0=new Label(0, rowNumbers, bean.getSn());
             Label label1=new Label(1, rowNumbers, bean.getDeviceID());
             Label label2=new Label(2, rowNumbers, bean.getCurrent());
-            Label label3=new Label(3, rowNumbers, bean.getCurrentThresHold());
-            Label label4=new Label(4, rowNumbers, bean.getTestResult());
-            Label label5=new Label(5, rowNumbers, bean.getTestDate());
+            Label label3=new Label(3, rowNumbers, bean.getMachineNo());
+            Label label4=new Label(4, rowNumbers, bean.getMachineName());
+            Label label5=new Label(5, rowNumbers, bean.getTestResult());
+            Label label6=new Label(6, rowNumbers, bean.getTestDate());
             writableSheet.addCell(label0);
             writableSheet.addCell(label1);
             writableSheet.addCell(label2);
             writableSheet.addCell(label3);
             writableSheet.addCell(label4);
             writableSheet.addCell(label5);
+            writableSheet.addCell(label6);
             workbook.write();
             isSave=true;
         } catch (Exception e) {
@@ -232,6 +234,7 @@ public class ExcelUtils {
                 bean.setDeviceID(sheet.getCell(1, i).getContents());
                 bean.setMachineName(sheet.getCell(2, i).getContents());
                 bean.setMachineId(sheet.getCell(3, i).getContents());
+                bean.setMachineNo(sheet.getCell(4, i).getContents());
                 beans.add(bean);
             }
         } catch (FileNotFoundException e) {

@@ -150,7 +150,12 @@ public class DataUtils {
     }
 
     public static void setCurrentThreshold(BLEFramework bleFramework, int number) {
-        addCommand(bleFramework, (byte) CommonParams.SET_CURRENT_THRESHOLD_REQ, HexUtil.intToBytes(number));
+        byte[] bytes=new byte[3];
+        bytes[0]= (byte) CommonParams.SET_CURRENT_THRESHOLD_REQ;
+        for (int i = 0; i < HexUtil.intToBytes(number).length; i++) {
+            bytes[i+1]=HexUtil.intToBytes(number)[0];
+        }
+        addCommand(bleFramework, (byte) CommonParams.SET_CURRENT_THRESHOLD_REQ, bytes);
     }
 
     public static void enterOta(BLEFramework bleFramework) {
