@@ -1,177 +1,142 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+        <TextView
+            android:text="1. 导入excel数据\n文件请保存在系统根目录下，文件名为test_input.xls，文件格式请参考范例"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp" />
+        <Button
+            android:text="开始导入"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/read_from_excel"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"/>
+        <TextView
+            android:text="2. 输入机器ID获得deviceId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:orientation="horizontal">
+            <EditText
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:background="@android:color/holo_orange_light"
+                android:padding="5dip"
+                android:hint="请输入机器ID"
+                android:textSize="14sp"
+                android:id="@+id/edit_machineid"/>
+            <Button
+                android:text="查询"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/search_deviceid"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
+        <TextView
+            android:text="查询结果：暂无"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/search_deviceid_result"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"/>
+        <TextView
+            android:text="3. 扫码连接"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"/>
+        <Button
+            android:text="点击扫码"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/button_qrcode_scan"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp" />
+        <TextView
+            android:text="BLE状态：连接断开"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/ble_state"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"/>
+        <TextView
+            android:text="4. 写入deviceId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"/>
+        <Button
+            android:text="点击写入"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/button_setdeviceid"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp" />
+        <TextView
+            android:text="5. 测试负载"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:orientation="horizontal">
+            <Button
+                android:text="点击获取"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/s_button_get_device_current" />
 
-    <Button
-        android:text="点击写入"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/button_setdeviceid"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/textView5"
-        app:layout_constraintLeft_toLeftOf="@+id/textView5" />
+            <Button
+                android:text="点击设置"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/s_button_write_device_current"
+                android:layout_marginStart="16dp"/>
 
-    <Button
-        android:text="保存上传"
-        android:layout_marginTop="8dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/button_save_to_excel"
-        app:layout_constraintTop_toBottomOf="@+id/textView6"
-        app:layout_constraintLeft_toLeftOf="@+id/textView6" />
-
-
-    <Button
-        android:text="点击扫码"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/button_qrcode_scan"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/textView4"
-        app:layout_constraintLeft_toLeftOf="@+id/textView4" />
-
-    <Button
-        android:text="开始导入"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/read_from_excel"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
-        app:layout_constraintLeft_toLeftOf="@+id/textView" />
-
-    <EditText
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:background="@android:color/holo_orange_light"
-        android:padding="5dip"
-        android:hint="请输入机器ID"
-        android:textSize="14sp"
-        android:id="@+id/edit_machineid"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/textView2"
-        app:layout_constraintLeft_toLeftOf="@+id/textView2" />
-
-    <TextView
-        android:text="1. 导入excel数据\n文件请保存在系统根目录下，文件名为test_input.xls，文件格式请参考范例"
-        android:layout_width="352dp"
-        android:layout_height="52dp"
-        android:id="@+id/textView"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent" />
-
-    <TextView
-        android:text="2. 输入机器ID获得deviceId"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView2"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/read_from_excel"
-        app:layout_constraintLeft_toLeftOf="@+id/read_from_excel" />
-
-    <Button
-        android:text="查询"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/search_deviceid"
-        android:layout_marginStart="8dp"
-        app:layout_constraintLeft_toRightOf="@+id/edit_machineid"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBaseline_toBaselineOf="@+id/edit_machineid" />
-
-    <TextView
-        android:text="查询结果：暂无"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/search_deviceid_result"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/edit_machineid"
-        app:layout_constraintLeft_toLeftOf="@+id/edit_machineid" />
-
-    <TextView
-        android:text="3. 扫码连接"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView4"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/search_deviceid_result"
-        app:layout_constraintLeft_toLeftOf="@+id/search_deviceid_result" />
-
-    <TextView
-        android:text="4. 写入deviceId"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView5"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/ble_state"
-        app:layout_constraintLeft_toLeftOf="@+id/ble_state" />
-
-    <TextView
-        android:text="5. 保存上传\n文件在系统根目录下，文件名为test.xls，文件格式请参考范例"
-        android:layout_width="352dp"
-        android:layout_height="51dp"
-        android:id="@+id/textView6"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/s_button_get_device_current"
-        app:layout_constraintLeft_toLeftOf="@+id/s_button_get_device_current" />
-
-    <TextView
-        android:text="BLE状态：连接断开"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/ble_state"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/button_qrcode_scan"
-        app:layout_constraintLeft_toLeftOf="@+id/button_qrcode_scan" />
-
-    <TextView
-        android:text="5. 测试负载"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView15"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/button_setdeviceid"
-        app:layout_constraintLeft_toLeftOf="@+id/button_setdeviceid" />
-
-    <Button
-        android:text="点击获取"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/s_button_get_device_current"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/textView15"
-        app:layout_constraintLeft_toLeftOf="@+id/textView15" />
-
-    <Button
-        android:text="点击设置"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/s_button_write_device_current"
-        android:layout_marginStart="16dp"
-        app:layout_constraintLeft_toRightOf="@+id/s_button_get_device_current"
-        app:layout_constraintTop_toBottomOf="@+id/textView15"
-        android:layout_marginTop="8dp" />
-
-    <EditText
-        android:layout_width="123dp"
-        android:layout_height="45dp"
-        android:inputType="number"
-        android:ems="10"
-        android:id="@+id/s_ed_write_device_current"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/textView15"
-        android:layout_marginStart="8dp"
-        android:padding="5dip"
-        android:textSize="14sp"
-        android:hint="输入电流值"
-        app:layout_constraintLeft_toRightOf="@+id/s_button_write_device_current"
-        android:background="@android:color/holo_orange_light" />
-
-</android.support.constraint.ConstraintLayout>
+            <EditText
+                android:layout_width="123dp"
+                android:layout_height="45dp"
+                android:inputType="number"
+                android:ems="10"
+                android:id="@+id/s_ed_write_device_current"
+                android:layout_marginStart="8dp"
+                android:padding="5dip"
+                android:textSize="14sp"
+                android:hint="输入电流值"
+                android:background="@android:color/holo_orange_light" />
+        </LinearLayout>
+        <TextView
+            android:text="6. 保存上传\n文件在系统根目录下，文件名为test.xls，文件格式请参考范例"
+            android:layout_width="352dp"
+            android:layout_height="51dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"/>
+        <Button
+            android:text="保存上传"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/button_save_to_excel" />
+    </LinearLayout>
+</ScrollView>

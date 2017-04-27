@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.renyu.bledemo.R;
@@ -104,7 +105,8 @@ public class DeviceListActivity extends AppCompatActivity {
                 b4[5]=b3[5];
                 try {
                     String sn=new String(b4, "utf-8");
-                    if (sn.equals(getIntent().getStringExtra("scanTarget").toLowerCase())) {
+                    Log.d("DeviceListActivity", sn);
+                    if (sn.toLowerCase().equals(getIntent().getStringExtra("scanTarget").toLowerCase())) {
                         isFind=true;
                         choice(bleDevice, sn);
                     }

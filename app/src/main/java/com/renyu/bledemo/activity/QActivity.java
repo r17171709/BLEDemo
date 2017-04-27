@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -53,8 +54,6 @@ public class QActivity extends AppCompatActivity {
 
     @BindView(R.id.q_ble_state)
     TextView q_ble_state;
-    @BindView(R.id.et_deviation)
-    EditText et_deviation;
     @BindView(R.id.et_current)
     EditText et_current;
     @BindView(R.id.q_button_get_device_currentresult)
@@ -96,21 +95,21 @@ public class QActivity extends AppCompatActivity {
                 Toast.makeText(QActivity.this, "指令执行出错", Toast.LENGTH_SHORT).show();
             }
             else if (msg.what==com.renyu.bledemo.params.CommonParams.GET_DEVICE_CURRENT_RESP) {
-                int tempInt=Integer.parseInt(msg.obj.toString());
+                double tempDouble=Double.parseDouble(msg.obj.toString())/1000;
                 double et_current_num= TextUtils.isEmpty(et_current.getText().toString())?
-                        0.45:Double.parseDouble(et_current.getText().toString());
-                double et_deviation_num= TextUtils.isEmpty(et_deviation.getText().toString())?
-                        15:Double.parseDouble(et_deviation.getText().toString());
+                        1:Double.parseDouble(et_current.getText().toString());
 
-                double low=et_current_num*10*(100-et_deviation_num);
-                double max=et_current_num*10*(100+et_deviation_num);
-                if (tempInt>low && tempInt<max) {
-                    q_button_get_device_currentresult.setText("Pass，电流值"+tempInt);
+                double max=et_current_num+0.2;
+                double low=et_current_num-0.2;
+                if (tempDouble>low && tempDouble<max) {
+                    q_button_get_device_currentresult.setText("Pass，电流值"+tempDouble);
+                    q_button_get_device_currentresult.setTextColor(Color.GREEN);
                     Toast.makeText(QActivity.this, "Read Current Raw value成功", Toast.LENGTH_SHORT).show();
                     save(-1);
                 }
                 else {
-                    q_button_get_device_currentresult.setText("Fail，电流值"+tempInt);
+                    q_button_get_device_currentresult.setText("电流值超差，电流值"+tempDouble);
+                    q_button_get_device_currentresult.setTextColor(Color.RED);
                     Toast.makeText(QActivity.this, "Read Current Raw value失败", Toast.LENGTH_SHORT).show();
                     save(1);
                 }
@@ -128,7 +127,7 @@ public class QActivity extends AppCompatActivity {
                 com.renyu.bledemo.params.CommonParams.UUID_SERVICE,
                 com.renyu.bledemo.params.CommonParams.UUID_Characteristic,
                 com.renyu.bledemo.params.CommonParams.UUID_DESCRIPTOR);
-        bleFramework.setTimeSeconds(15000);
+        bleFramework.setTimeSeconds(10000);
         bleFramework.setBleConnectListener(new BLEConnectListener() {
             @Override
             public void getAllScanDevice(ArrayList<BLEDevice> devices) {
@@ -161,8 +160,8 @@ public class QActivity extends AppCompatActivity {
                     message.what=response[0]&0xff;
                     if ((response[0]&0xff) == com.renyu.bledemo.params.CommonParams.GET_DEVICE_CURRENT_RESP) {
                         byte[] temp=new byte[2];
-                        temp[0]=response[1];
-                        temp[1]=response[2];
+                        temp[0]=response[2];
+                        temp[1]=response[1];
                         int tempInt=HexUtil.byte2ToInt(temp);
                         message.obj=tempInt;
                     }
@@ -218,6 +217,8 @@ public class QActivity extends AppCompatActivity {
             ACache.get(this).put("sn", data.getStringExtra("sn"));
             bleFramework.startConn(bleDevice);
             progressDialog= ProgressDialog.show(this, "提示", "正在连接");
+            q_button_get_device_currentresult.setText("测试结果");
+            q_button_get_device_currentresult.setTextColor(Color.BLACK);
         }
         else if (requestCode==com.renyu.bledemo.params.CommonParams.SCANDEVICE && resultCode==RESULT_CANCELED) {
             bleFramework.cancelScan();
@@ -241,7 +242,6 @@ public class QActivity extends AppCompatActivity {
             case R.id.button_upload:
                 if (ACache.get(QActivity.this).getAsString("sn")!=null &&
                         q_ble_state.getText().toString().equals("BLE状态：连接断开")) {
-                    q_button_get_device_currentresult.setText("测试结果");
                     save(2);
                 }
                 break;

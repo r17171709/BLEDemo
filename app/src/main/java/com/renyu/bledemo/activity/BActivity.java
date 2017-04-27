@@ -133,7 +133,7 @@ public class BActivity extends AppCompatActivity {
                 com.renyu.bledemo.params.CommonParams.UUID_SERVICE,
                 com.renyu.bledemo.params.CommonParams.UUID_Characteristic,
                 com.renyu.bledemo.params.CommonParams.UUID_DESCRIPTOR);
-        bleFramework.setTimeSeconds(10000);
+        bleFramework.setTimeSeconds(3000);
         bleFramework.setBleConnectListener(new BLEConnectListener() {
             @Override
             public void getAllScanDevice(ArrayList<BLEDevice> devices) {

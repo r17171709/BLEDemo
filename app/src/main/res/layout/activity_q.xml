@@ -31,25 +31,15 @@
         android:layout_marginTop="16dp"
         android:layout_marginStart="16dp"/>
     <EditText
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="number"
         android:ems="10"
-        android:hint="修改参考电流，默认0.45A, 请输入0以上的数字"
+        android:hint="修改参考电流，默认1A, 请输入0以上的数字, \n修改允许偏差，默认±0.2A，请输入0以上100以下的数字"
         android:textSize="13sp"
         android:id="@+id/et_current"
         android:layout_marginTop="8dp"
         android:layout_marginStart="16dp" />
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="number"
-        android:ems="10"
-        android:hint="修改允许偏差，默认±15%，请输入0以上100以下的数字"
-        android:textSize="13sp"
-        android:id="@+id/et_deviation"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="16dp"/>
     <Button
         android:text="点击获取"
         android:layout_width="wrap_content"
@@ -60,6 +50,7 @@
     <TextView
         android:id="@+id/q_button_get_device_currentresult"
         android:text="测试结果"
+        android:textColor="@android:color/black"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"

@@ -62,7 +62,7 @@ public class BLEFramework {
     // 临时搜索设备
     private HashMap<String, BLEDevice> tempsDevices;
     // 搜索所需时间
-    private int timeSeconds=5000;
+    private int timeSeconds=3000;
     // 搜索Handler
     private Handler handlerScan;
 
