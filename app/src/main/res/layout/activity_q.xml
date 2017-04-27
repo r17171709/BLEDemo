@@ -1,57 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
     <TextView
         android:text="1. 扫码连接"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/textView7"
         android:layout_marginTop="16dp"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginStart="16dp"
-        app:layout_constraintLeft_toLeftOf="parent" />
-
+        android:layout_marginStart="16dp"/>
     <Button
         android:text="点击扫码"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/q_button_scan"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/textView7"
-        app:layout_constraintLeft_toLeftOf="@+id/textView7" />
-
+        android:layout_marginStart="16dp"/>
     <TextView
         android:text="BLE状态：连接断开"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/q_ble_state"
-        app:layout_constraintLeft_toLeftOf="@+id/q_button_scan"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/q_button_scan" />
-
+        android:layout_marginStart="16dp" />
     <TextView
         android:text="2. 测试负载"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/textView11"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/q_ble_state"
-        app:layout_constraintLeft_toLeftOf="@+id/q_ble_state" />
-
-    <Button
-        android:text="点击获取"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/q_button_get_device_current"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/et_deviation"
-        app:layout_constraintLeft_toLeftOf="@+id/et_deviation" />
-
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"/>
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -61,9 +39,7 @@
         android:textSize="13sp"
         android:id="@+id/et_current"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/textView11"
-        app:layout_constraintLeft_toLeftOf="@+id/textView11" />
-
+        android:layout_marginStart="16dp" />
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -73,24 +49,33 @@
         android:textSize="13sp"
         android:id="@+id/et_deviation"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/et_current"
-        app:layout_constraintLeft_toLeftOf="@+id/et_current" />
-
-    <TextView
-        android:text="3. 手动提交(设备连接不上时候使用)"
+        android:layout_marginStart="16dp"/>
+    <Button
+        android:text="点击获取"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/textView12"
+        android:id="@+id/q_button_get_device_current"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/q_button_get_device_current"
-        app:layout_constraintLeft_toLeftOf="@+id/q_button_get_device_current" />
+        android:layout_marginStart="16dp" />
+    <TextView
+        android:id="@+id/q_button_get_device_currentresult"
+        android:text="测试结果"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp" />
+    <TextView
+        android:text="3. 保存结果(设备连接不上时候使用)"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp" />
 
     <Button
-        android:text="点击提交"
+        android:text="保存结果"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/button_upload"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/textView12"
-        app:layout_constraintLeft_toLeftOf="@+id/textView12" />
-</android.support.constraint.ConstraintLayout>
+        android:layout_marginStart="16dp"/>
+</LinearLayout>

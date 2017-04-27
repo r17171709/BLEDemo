@@ -57,6 +57,8 @@ public class QActivity extends AppCompatActivity {
     EditText et_deviation;
     @BindView(R.id.et_current)
     EditText et_current;
+    @BindView(R.id.q_button_get_device_currentresult)
+    TextView q_button_get_device_currentresult;
     ProgressDialog progressDialog;
 
     String scanTarget;
@@ -103,10 +105,12 @@ public class QActivity extends AppCompatActivity {
                 double low=et_current_num*10*(100-et_deviation_num);
                 double max=et_current_num*10*(100+et_deviation_num);
                 if (tempInt>low && tempInt<max) {
+                    q_button_get_device_currentresult.setText("Pass，电流值"+tempInt);
                     Toast.makeText(QActivity.this, "Read Current Raw value成功", Toast.LENGTH_SHORT).show();
                     save(-1);
                 }
                 else {
+                    q_button_get_device_currentresult.setText("Fail，电流值"+tempInt);
                     Toast.makeText(QActivity.this, "Read Current Raw value失败", Toast.LENGTH_SHORT).show();
                     save(1);
                 }
@@ -237,6 +241,7 @@ public class QActivity extends AppCompatActivity {
             case R.id.button_upload:
                 if (ACache.get(QActivity.this).getAsString("sn")!=null &&
                         q_ble_state.getText().toString().equals("BLE状态：连接断开")) {
+                    q_button_get_device_currentresult.setText("测试结果");
                     save(2);
                 }
                 break;
