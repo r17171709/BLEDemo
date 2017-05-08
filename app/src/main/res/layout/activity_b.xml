@@ -49,7 +49,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginStart="16dp"/>
         <TextView
-            android:text="flash正常\n刷卡正常\nRLED正常\n开关正常\n蜂鸣正常\n蓝牙信号正常"
+            android:text="flash正常 刷卡正常 RLED正常\n开关正常 蜂鸣正常 蓝牙信号正常"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -92,5 +92,18 @@
                 android:id="@+id/iv_qrcode"
                 android:layout_marginStart="56dp"/>
         </LinearLayout>
+        <TextView
+            android:text="5. 重置"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp" />
+        <Button
+            android:id="@+id/b_button_reset"
+            android:text="重置"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 </ScrollView>

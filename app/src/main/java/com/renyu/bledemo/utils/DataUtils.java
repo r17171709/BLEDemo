@@ -163,4 +163,11 @@ public class DataUtils {
         bytes[0]=(byte) 0x90;
         bleFramework.addCommand(bytes);
     }
+
+    public static void reset(BLEFramework bleFramework) {
+        byte[] bytes=new byte[2];
+        bytes[0]=(byte) CommonParams.RESTORE_FACTORY_REQ;
+        bytes[1]=(byte) 0x00;
+        addCommand(bleFramework, (byte) CommonParams.RESTORE_FACTORY_REQ, bytes);
+    }
 }

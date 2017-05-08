@@ -238,7 +238,7 @@ public class BActivity extends AppCompatActivity {
         }
     }
 
-    @OnClick({R.id.b_button_scanall, R.id.b_button_upload, R.id.b_button_magic})
+    @OnClick({R.id.b_button_scanall, R.id.b_button_upload, R.id.b_button_magic, R.id.b_button_reset})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.b_button_scanall:
@@ -264,6 +264,9 @@ public class BActivity extends AppCompatActivity {
                         saveImage();
                     }
                 }
+                break;
+            case R.id.b_button_reset:
+                DataUtils.reset(bleFramework);
                 break;
         }
     }

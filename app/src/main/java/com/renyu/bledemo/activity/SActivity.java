@@ -81,7 +81,6 @@ public class SActivity extends AppCompatActivity {
                 }
                 ACache.get(SActivity.this).clear();
                 ble_state.setText("BLE状态：连接断开");
-                edit_machineid.setText("");
                 search_deviceid_result.setText("查询结果：暂无");
                 isDeviceIdPass=false;
             }
@@ -294,7 +293,6 @@ public class SActivity extends AppCompatActivity {
                         Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
                         ACache.get(SActivity.this).clear();
                         bleFramework.disConnect();
-                        edit_machineid.setText("");
                         search_deviceid_result.setText("查询结果：暂无");
                         isDeviceIdPass=false;
                     }

@@ -24,6 +24,7 @@ public class CommonParams {
     public static final int SET_DEVICEID_RESP=0x9b;
     public static final int SET_CURRENT_THRESHOLD_REQ=0x9e;
     public static final int SET_CURRENT_THRESHOLD_RESP=0x9f;
+    public static final int RESTORE_FACTORY_REQ=0xa6;
 
     public static final int SCANDEVICE=1001;
     public static final int QRCODESCAN=1002;
