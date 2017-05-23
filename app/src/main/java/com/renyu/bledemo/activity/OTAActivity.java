@@ -20,6 +20,7 @@ import com.renyu.blelibrary.bean.BLEDevice;
 import com.renyu.blelibrary.bean.OTABean;
 import com.renyu.blelibrary.ble.BLEFramework;
 import com.renyu.blelibrary.impl.BLEConnectListener;
+import com.renyu.blelibrary.impl.BLEResponseListener;
 import com.renyu.blelibrary.impl.BLEStateChangeListener;
 import com.renyu.blelibrary.params.CommonParams;
 import com.renyu.blelibrary.utils.BLEUtils;
@@ -57,7 +58,12 @@ public class OTAActivity extends AppCompatActivity {
                     progressDialog.dismiss();
                     if (msg.what== BLEFramework.STATE_SERVICES_DISCOVERED) {
                         Toast.makeText(OTAActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
-                        DataUtils.enterOta(bleFramework);
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                DataUtils.enterOta(bleFramework);
+                            }
+                        }, 1000);
                     }
                     else {
                         Toast.makeText(OTAActivity.this, "开始ota升级", Toast.LENGTH_SHORT).show();
@@ -109,6 +115,15 @@ public class OTAActivity extends AppCompatActivity {
                 Message message=new Message();
                 message.what=currentState;
                 handlerConnState.sendMessage(message);
+            }
+        });
+        bleFramework.setBleResponseListener(new BLEResponseListener() {
+            @Override
+            public void getResponseValues(byte[] value) {
+                int result=value[2]&0xff;
+                if (result!=com.renyu.bledemo.params.CommonParams.ERROR_RESP) {
+
+                }
             }
         });
 

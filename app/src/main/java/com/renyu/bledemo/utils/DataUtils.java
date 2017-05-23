@@ -160,7 +160,7 @@ public class DataUtils {
 
     public static void enterOta(BLEFramework bleFramework) {
         byte[] bytes=new byte[1];
-        bytes[0]=(byte) 0x90;
+        bytes[0]=(byte) 0xa7;
         bleFramework.addCommand(bytes);
     }
 

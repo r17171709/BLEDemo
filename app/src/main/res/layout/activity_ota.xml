@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -26,7 +25,7 @@
         app:layout_constraintLeft_toLeftOf="parent" />
 
     <TextView
-        android:text="2. 如果此时红灯闪烁，说明已经进入ota模式，请点击开始"
+        android:text="2. 如果此时绿灯常亮，说明已经进入ota模式，请点击开始"
         android:layout_width="252dp"
         android:layout_height="38dp"
         android:id="@+id/textView14"

@@ -122,10 +122,11 @@ public class BLEFramework {
         leScanCallback=new BluetoothAdapter.LeScanCallback() {
             @Override
             public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-                Log.d("onLeScan", device.getAddress());
-                Log.d("onLeScan", HexUtil.encodeHexStr(scanRecord));
                 if (device!=null) {
                     if (!tempsDevices.containsKey(device.getAddress())) {
+                        Log.d("onLeScan", device.getAddress());
+                        Log.d("onLeScan", HexUtil.encodeHexStr(scanRecord));
+
                         BLEDevice device1=new BLEDevice();
                         device1.setRssi(rssi);
                         device1.setDevice(device);
@@ -283,6 +284,9 @@ public class BLEFramework {
      * @return
      */
     public void startScan() {
+        devices.clear();
+        tempsDevices.clear();
+
         boolean success=adapter.startLeScan(leScanCallback);
         if (success) {
             // 开始搜索
