@@ -263,6 +263,9 @@ public class QActivity extends AppCompatActivity {
             bean.setCurrent("Pass");
             bean.setTestResult("Pass");
         }
+        double et_current_num= TextUtils.isEmpty(et_current.getText().toString())?
+                0:Double.parseDouble(et_current.getText().toString());
+        bean.setCurrentNum(""+et_current_num);
         SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         bean.setTestDate(dateFormat.format(new Date()));
         if (ExcelUtils.writeExcelQ(Environment.getExternalStorageDirectory().getPath()+ File.separator+ com.renyu.bledemo.params.CommonParams.WRITEFILE_Q, bean)) {

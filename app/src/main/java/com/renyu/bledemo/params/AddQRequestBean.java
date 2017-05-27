@@ -9,6 +9,7 @@ public class AddQRequestBean {
     String testResult;
     String testDate;
     String current;
+    String currentNum;
 
     public String getSn() {
         return sn;
@@ -40,5 +41,13 @@ public class AddQRequestBean {
 
     public void setCurrent(String current) {
         this.current = current;
+    }
+
+    public String getCurrentNum() {
+        return currentNum;
+    }
+
+    public void setCurrentNum(String currentNum) {
+        this.currentNum = currentNum;
     }
 }
