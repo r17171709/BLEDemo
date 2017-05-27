@@ -105,13 +105,13 @@ public class QActivity extends AppCompatActivity {
                     q_button_get_device_currentresult.setText("Pass，电流值"+tempDouble);
                     q_button_get_device_currentresult.setTextColor(Color.GREEN);
                     Toast.makeText(QActivity.this, "Read Current Raw value成功", Toast.LENGTH_SHORT).show();
-                    save(-1);
+                    save(-1, ""+tempDouble);
                 }
                 else {
                     q_button_get_device_currentresult.setText("电流值超差，电流值"+tempDouble);
                     q_button_get_device_currentresult.setTextColor(Color.RED);
                     Toast.makeText(QActivity.this, "Read Current Raw value失败", Toast.LENGTH_SHORT).show();
-                    save(1);
+                    save(1, ""+tempDouble);
                 }
             }
         }
@@ -242,13 +242,13 @@ public class QActivity extends AppCompatActivity {
             case R.id.button_upload:
                 if (ACache.get(QActivity.this).getAsString("sn")!=null &&
                         q_ble_state.getText().toString().equals("BLE状态：连接断开")) {
-                    save(2);
+                    save(2, "0");
                 }
                 break;
         }
     }
 
-    private void save(int errorCode) {
+    private void save(int errorCode, String tempDouble) {
         AddQRequestBean bean=new AddQRequestBean();
         bean.setSn(ACache.get(QActivity.this).getAsString("sn"));
         if (errorCode==2) {
@@ -263,9 +263,7 @@ public class QActivity extends AppCompatActivity {
             bean.setCurrent("Pass");
             bean.setTestResult("Pass");
         }
-        double et_current_num= TextUtils.isEmpty(et_current.getText().toString())?
-                0:Double.parseDouble(et_current.getText().toString());
-        bean.setCurrentNum(""+et_current_num);
+        bean.setCurrentNum(""+tempDouble);
         SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         bean.setTestDate(dateFormat.format(new Date()));
         if (ExcelUtils.writeExcelQ(Environment.getExternalStorageDirectory().getPath()+ File.separator+ com.renyu.bledemo.params.CommonParams.WRITEFILE_Q, bean)) {
