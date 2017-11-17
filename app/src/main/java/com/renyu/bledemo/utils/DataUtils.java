@@ -152,9 +152,8 @@ public class DataUtils {
     public static void setCurrentThreshold(BLEFramework bleFramework, int number) {
         byte[] bytes=new byte[3];
         bytes[0]= (byte) CommonParams.SET_CURRENT_THRESHOLD_REQ;
-        for (int i = 0; i < HexUtil.intToBytes(number).length; i++) {
-            bytes[i+1]=HexUtil.intToBytes(number)[0];
-        }
+        bytes[1] = (byte) (number/256);
+        bytes[2] = (byte) (number%256);
         addCommand(bleFramework, (byte) CommonParams.SET_CURRENT_THRESHOLD_REQ, bytes);
     }
 
