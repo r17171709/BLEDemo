@@ -5,7 +5,7 @@ android {
     compileSdkVersion 26
 
     defaultConfig {
-        applicationId "com.renyu.bledemo.release"
+        applicationId "com.renyu.bledemo.deploy"
         minSdkVersion 21
         targetSdkVersion 26
         versionCode 2
