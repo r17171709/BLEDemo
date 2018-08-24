@@ -55,6 +55,10 @@ public class SActivity extends AppCompatActivity {
     TextView search_deviceid_result;
     @BindView(R.id.s_ed_write_device_current)
     EditText s_ed_write_device_current;
+    @BindView(R.id.s_ed_average_current_time)
+    EditText s_ed_average_current_time;
+    @BindView(R.id.s_ed_load_measured)
+    EditText s_ed_load_measured;
     ProgressDialog progressDialog;
 
     String scanTarget;
@@ -257,7 +261,8 @@ public class SActivity extends AppCompatActivity {
 
     @OnClick({R.id.button_setdeviceid, R.id.s_button_write_device_current,
             R.id.read_from_excel, R.id.button_save_to_excel, R.id.button_qrcode_scan,
-            R.id.search_deviceid, R.id.s_button_get_device_current})
+            R.id.search_deviceid, R.id.s_button_get_device_current, R.id.s_button_buzzer_close,
+            R.id.s_button_buzzer_open, R.id.s_button_average_current_time, R.id.s_button_load_measured})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_setdeviceid:
@@ -369,6 +374,21 @@ public class SActivity extends AppCompatActivity {
                     DataUtils.setCurrentThreshold(bleFramework, Integer.parseInt(s_ed_write_device_current.getText().toString()));
                 }
                 break;
+            case R.id.s_button_buzzer_close:
+                DataUtils.setBuzzerSwitch(bleFramework, false);
+                break;
+            case R.id.s_button_buzzer_open:
+                DataUtils.setBuzzerSwitch(bleFramework, true);
+                break;
+            case R.id.s_button_average_current_time:
+                if (!TextUtils.isEmpty(s_ed_average_current_time.getText().toString())) {
+                    DataUtils.setAverageCurrentTime(bleFramework, Integer.parseInt(s_ed_average_current_time.getText().toString()));
+                }
+                break;
+            case R.id.s_button_load_measured:
+                if (!TextUtils.isEmpty(s_ed_load_measured.getText().toString())) {
+                    DataUtils.setLoadMeasured(bleFramework, Integer.parseInt(s_ed_load_measured.getText().toString()));
+                }
         }
     }
 

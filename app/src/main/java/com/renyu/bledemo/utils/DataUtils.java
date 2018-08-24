@@ -146,7 +146,7 @@ public class DataUtils {
         for (int i=2;i<18;i++) {
             bytes[i]=deviceId.getBytes()[i-2];
         }
-        addCommand(bleFramework, (byte) CommonParams.SET_MAGIC_REQ, bytes);
+        addCommand(bleFramework, (byte) CommonParams.SET_DEVICEID_REQ, bytes);
     }
 
     public static void setCurrentThreshold(BLEFramework bleFramework, int number) {
@@ -155,6 +155,27 @@ public class DataUtils {
         bytes[2] = (byte) (number/256);
         bytes[1] = (byte) (number%256);
         addCommand(bleFramework, (byte) CommonParams.SET_CURRENT_THRESHOLD_REQ, bytes);
+    }
+
+    public static void setBuzzerSwitch(BLEFramework bleFramework, boolean open) {
+        byte[] bytes=new byte[2];
+        bytes[0]= (byte) CommonParams.SET_BUZZER_REQ;
+        bytes[1]= (byte) (open?1:0);
+        addCommand(bleFramework, (byte) CommonParams.SET_BUZZER_REQ, bytes);
+    }
+
+    public static void setAverageCurrentTime(BLEFramework bleFramework, int number) {
+        byte[] bytes=new byte[2];
+        bytes[0]= (byte) CommonParams.SET_AverageCurrentTime_REQ;
+        bytes[1] = (byte) number;
+        addCommand(bleFramework, (byte) CommonParams.SET_AverageCurrentTime_REQ, bytes);
+    }
+
+    public static void setLoadMeasured(BLEFramework bleFramework, int number) {
+        byte[] bytes=new byte[2];
+        bytes[0]= (byte) CommonParams.SET_Load_Measured_REQ;
+        bytes[1] = (byte) number;
+        addCommand(bleFramework, (byte) CommonParams.SET_Load_Measured_REQ, bytes);
     }
 
     public static void enterOta(BLEFramework bleFramework) {

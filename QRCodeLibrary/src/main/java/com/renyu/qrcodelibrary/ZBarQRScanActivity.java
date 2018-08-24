@@ -18,7 +18,6 @@ import cn.bingoogolapple.qrcode.zbar.ZBarView;
 
 public class ZBarQRScanActivity extends AppCompatActivity {
 
-    @BindView(R2.id.zbar_scan_view)
     ZBarView zbar_scan_view;
 
     @Override
@@ -28,6 +27,7 @@ public class ZBarQRScanActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
 //        zbar_scan_view.changeToScanBarcodeStyle();
+        zbar_scan_view = findViewById(R.id.zbar_scan_view);
         zbar_scan_view.setDelegate(new QRCodeView.Delegate() {
             @Override
             public void onScanQRCodeSuccess(String result) {

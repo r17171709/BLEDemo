@@ -37,19 +37,19 @@ public class BLEFramework {
     private static BLEFramework bleFramework;
 
     // 服务UUID
-    private UUID UUID_SERVICE = null;
-    private UUID UUID_Characteristic = null;
-    private UUID UUID_DESCRIPTOR = null;
+    private UUID UUID_SERVICE;
+    private UUID UUID_Characteristic;
+    private UUID UUID_DESCRIPTOR;
     // 设备连接断开
     public static final int STATE_DISCONNECTED = 0;
     // 设备正在扫描
-    public static final int STATE_SCANNING = 1;
+    private static final int STATE_SCANNING = 1;
     // 设备扫描结束
     public static final int STATE_SCANNED = 2;
     // 设备正在连接
-    public static final int STATE_CONNECTING = 3;
+    private static final int STATE_CONNECTING = 3;
     // 设备连接成功
-    public static final int STATE_CONNECTED = 4;
+    private static final int STATE_CONNECTED = 4;
     // 设备配置服务成功
     public static final int STATE_SERVICES_DISCOVERED = 5;
     // 设备配置OTA服务成功
@@ -70,7 +70,6 @@ public class BLEFramework {
     private static RequestQueue requestQueue;
 
     private Context context;
-    private BluetoothManager manager;
     private BluetoothAdapter adapter;
     private BluetoothAdapter.LeScanCallback leScanCallback;
     private BluetoothGattCallback bleGattCallback;
@@ -108,13 +107,13 @@ public class BLEFramework {
         return bleFramework;
     }
 
-    public BLEFramework(final Context context,
-                        UUID UUID_SERVICE, UUID UUID_Characteristic, UUID UUID_DESCRIPTOR) {
+    private BLEFramework(final Context context,
+                         UUID UUID_SERVICE, UUID UUID_Characteristic, UUID UUID_DESCRIPTOR) {
         this.context=context;
         this.UUID_SERVICE=UUID_SERVICE;
         this.UUID_Characteristic=UUID_Characteristic;
         this.UUID_DESCRIPTOR=UUID_DESCRIPTOR;
-        manager= (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+        BluetoothManager manager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
         adapter= manager.getAdapter();
         devices=new ArrayList<>();
         tempsDevices=new HashMap<>();
@@ -306,7 +305,7 @@ public class BLEFramework {
     /**
      * 结束扫描
      */
-    public void stopScan() {
+    private void stopScan() {
         adapter.stopLeScan(leScanCallback);
         handlerScan.removeCallbacksAndMessages(null);
         // 搜索完毕
@@ -376,7 +375,7 @@ public class BLEFramework {
      * @param uuid
      * @param value
      */
-    protected void writeCharacteristic(UUID uuid, byte[] value) {
+    private void writeCharacteristic(UUID uuid, byte[] value) {
         if (gatt!=null) {
             BluetoothGattCharacteristic characteristic = gatt.getService(UUID_SERVICE).getCharacteristic(uuid);
             if (characteristic==null) {
@@ -425,7 +424,7 @@ public class BLEFramework {
     /**
      * 检查是否进入OTA模式
      */
-    public boolean checkIsOTA() {
+    private boolean checkIsOTA() {
 //        List<BluetoothGattService> gattServices=gatt.getServices();
 //        for (BluetoothGattService gattService : gattServices) {
 //            Log.d("BLEService", gattService.getUuid().toString());
@@ -464,5 +463,4 @@ public class BLEFramework {
     public void setM_otaExitBootloaderCmdInProgress(boolean m_otaExitBootloaderCmdInProgress) {
         this.m_otaExitBootloaderCmdInProgress=m_otaExitBootloaderCmdInProgress;
     }
-
 }

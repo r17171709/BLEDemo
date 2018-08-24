@@ -18,6 +18,12 @@ public class CommonParams {
     public static final int SET_SN_RESP=0xa8;
     public static final int SET_MAGIC_REQ=0xa9;
     public static final int SET_MAGIC_RESP=0xaa;
+    public static final int SET_BUZZER_REQ=0xab;
+    public static final int SET_BUZZER_RESP=0xac;
+    public static final int SET_AverageCurrentTime_REQ=0xad;
+    public static final int SET_AverageCurrentTime_RESP=0xae;
+    public static final int SET_Load_Measured_REQ=0xaf;
+    public static final int SET_Load_Measured_RESP=0xb0;
     public static final int GET_DEVICE_CURRENT_REQ=0x9c;
     public static final int GET_DEVICE_CURRENT_RESP=0x9d;
     public static final int SET_DEVICEID_REQ=0x9a;

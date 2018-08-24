@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.cypress.cysmart.CommonUtils.Constants;
@@ -60,7 +59,6 @@ public class OTAService extends Service implements FileReadStatusUpdater {
         mBluetoothDeviceAddress=BLEFramework.getBleFrameworkInstance().getMBluetoothDeviceAddress();
     }
 
-    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;

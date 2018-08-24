@@ -18,7 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.blankj.utilcode.utils.ImageUtils;
+import com.blankj.utilcode.util.ImageUtils;
 import com.renyu.bledemo.R;
 import com.renyu.bledemo.params.AddBRequestBean;
 import com.renyu.bledemo.utils.DataUtils;
@@ -292,7 +292,7 @@ public class BActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                boolean isOK=ImageUtils.save(QRCodeEncoder.syncEncodeQRCode(ACache.get(BActivity.this).getAsString("sn"), 300),
+                boolean isOK= ImageUtils.save(QRCodeEncoder.syncEncodeQRCode(ACache.get(BActivity.this).getAsString("sn"), 300),
                         file,
                         Bitmap.CompressFormat.JPEG);
                 if (isOK) {

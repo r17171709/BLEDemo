@@ -6,7 +6,7 @@ package com.renyu.blelibrary.bean;
 
 public class OTABean {
 
-    int process;
+    private int process;
 
     public int getProcess() {
         return process;

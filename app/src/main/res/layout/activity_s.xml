@@ -126,7 +126,88 @@
                 android:background="@android:color/holo_orange_light" />
         </LinearLayout>
         <TextView
-            android:text="6. 保存上传\n文件在系统根目录下，文件名为test.xls，文件格式请参考范例"
+            android:text="6. 蜂鸣器使能开关"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:orientation="horizontal">
+            <Button
+                android:text="关闭"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/s_button_buzzer_close" />
+            <Button
+                android:text="打开"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/s_button_buzzer_open" />
+        </LinearLayout>
+        <TextView
+            android:text="7. 电流平均时间"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:orientation="horizontal">
+            <EditText
+                android:layout_width="123dp"
+                android:layout_height="45dp"
+                android:inputType="number"
+                android:ems="10"
+                android:id="@+id/s_ed_average_current_time"
+                android:layout_marginStart="8dp"
+                android:padding="5dip"
+                android:textSize="14sp"
+                android:hint="输入平均电流时间"
+                android:background="@android:color/holo_orange_light" />
+            <Button
+                android:text="确定"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/s_button_average_current_time" />
+        </LinearLayout>
+        <TextView
+            android:text="8. 负载检测次数"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:orientation="horizontal">
+            <EditText
+                android:layout_width="123dp"
+                android:layout_height="45dp"
+                android:inputType="number"
+                android:ems="10"
+                android:id="@+id/s_ed_load_measured"
+                android:layout_marginStart="8dp"
+                android:padding="5dip"
+                android:textSize="14sp"
+                android:hint="输入负载检测次数"
+                android:background="@android:color/holo_orange_light" />
+            <Button
+                android:text="确定"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/s_button_load_measured" />
+        </LinearLayout>
+        <TextView
+            android:text="9. 保存上传\n文件在系统根目录下，文件名为test.xls，文件格式请参考范例"
             android:layout_width="352dp"
             android:layout_height="51dp"
             android:layout_marginTop="16dp"

@@ -206,9 +206,7 @@ public class ExcelUtils {
             if (workbook!=null) {
                 try {
                     workbook.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (WriteException e) {
+                } catch (IOException | WriteException e) {
                     e.printStackTrace();
                 }
             }
@@ -239,11 +237,7 @@ public class ExcelUtils {
                 bean.setMachineNo(sheet.getCell(4, i).getContents());
                 beans.add(bean);
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (BiffException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (BiffException | IOException e) {
             e.printStackTrace();
         }
         return beans;
@@ -261,11 +255,7 @@ public class ExcelUtils {
                 Workbook workbook=Workbook.getWorkbook(is);
                 Sheet sheet=workbook.getSheet(0);
                 rows=sheet.getRows();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (BiffException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (BiffException | IOException e) {
                 e.printStackTrace();
             } finally {
                 return rows;

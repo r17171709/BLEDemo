@@ -2,6 +2,8 @@ package com.renyu.bledemo.app;
 
 import android.app.Application;
 
+import com.blankj.utilcode.util.Utils;
+
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
@@ -17,7 +19,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        com.blankj.utilcode.utils.Utils.init(this);
+        Utils.init(this);
 
         Realm.init(this);
         RealmConfiguration configuration=new RealmConfiguration.Builder().name("devicesinfo").schemaVersion(1).build();
